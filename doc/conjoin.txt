@@ -1,0 +1,111 @@
+*conjoin.txt*	Remove line continuation characters when joining
+Trevor Stone <github@trevorstone.org>                                *conjoin*
+
+==============================================================================
+CONTENTS                                                    *conjoin-contents*
+  1. Introduction..............................................|conjoin-intro|
+  2. Commands...............................................|conjoin-commands|
+  3. Mappings...............................................|conjoin-mappings|
+  4. Configuration............................................|conjoin-config|
+  5. Functions.............................................|conjoin-functions|
+
+==============================================================================
+INTRODUCTION                                                   *conjoin-intro*
+
+conjoin is a plugin that handles line joining in the presence of line
+continuation characters.  Vim's normal behavior for |J| and |:join| on the
+following shell script:
+>
+  cat file.txt \
+    | sort \
+    | uniq -c
+<
+leaves the backslash continuation characters in place:
+>
+  cat file.txt \ | sort \ | uniq -c
+<
+With conjoin, running join commands on the same script will produce
+>
+  cat file.txt | sort | uniq -c
+<
+Note that vim already removes leading comment characters when joining lines in
+a block comment.
+
+conjoin works with several programming languages by default, see
+|conjoin-config| for details.
+
+==============================================================================
+COMMANDS                                                    *conjoin-commands*
+
+:[range]Join[!] [count] [flags]                                        *:Join*
+  Like :[range]join[!] [count] [flags] but removes continuation characters.
+  Before joining lines, trailing line continuation characters are removed from
+  each line in the range before the last and leading line continuation
+  characters are removed from each line after the first.
+
+==============================================================================
+MAPPINGS                                                    *conjoin-mappings*
+
+J  Join [count] lines, as with the builtin |J| command.  Before joining lines,
+trailing and/or leading continuation escape characters will be removed from
+the lines to be joined.
+
+{Visual}J  Join the highlighted lines, as with the builtin |v_J| command.
+Before joining lines, trailing and/or leading continuation escape characters
+will be removed from the lines to be joined.
+
+gJ  Like J but with joining semantics like the builting |gJ|. {Visual}gJ  Like
+J but with joining semantics like the builting |v_gJ|.
+
+==============================================================================
+CONFIGURATION                                                 *conjoin-config*
+
+g:conjoin_filetypes configures continuation patterns for many programming
+lanugages.  It is a dict with filetypes (e.g. "sh", "ruby", "vim") as keys and
+conjoin pattern dicts as values.  A conjoin dict has optional "trailing" and
+"leading" keys mapped to regular expression patterns.  When conjoin mappings
+or functions are called, the current buffer's 'filetype' is looked up in
+g:conjoin_filetypes.  If it contains a conjoin dict, the "trailing" pattern
+will be matched against each join line (except the last) and the "leading"
+pattern will be matched against each join line (except the first). Make sure
+to include $ at the end of trailing patterns and ^ at the beginning of leading
+patterns.  Example use in .vimrc:
+>
+
+  if !exists('g:conjoin_filetypes')
+    let g:conjoin_filetypes = {}
+  endif
+  g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
+<
+
+A buffer-local variable b:conjoin_patterns can replace the global filetype
+settings.
+
+The default set of configured filetypes is
+>
+  autoit bash c cobra context cpp csh fortran m4 mma plaintex ps1 python
+  ruby sh tcl tcsh tex texmf vb vim zsh
+<
+
+==============================================================================
+FUNCTIONS                                                  *conjoin-functions*
+
+conjoin#joinNormal({cmd}, {J})                          *conjoin#joinNormal()*
+  Removes continuation characters and then joins lines as if (count) cmd were
+  typed in normal mode.  This function is typically called from the J mapping
+  set by plugins/conjoin.vim but can be called directly from a user mapping.
+  If cmd is 'gJ', lines are joined without inserting/removing space.
+
+conjoin#joinVisual({cmd}, {J})                          *conjoin#joinVisual()*
+  Removes continuation characters and then joins lines as if cmd were typed in
+  visual mode.  This function is typically called from the J mapping set by
+  plugins/conjoin.vim but can be called directly from a user mapping. If cmd
+  is 'gJ', lines are joined without inserting/removing space.
+
+conjoin#joinEx({line1}, {line2}, {range}, {bang}, {qargs})  *conjoin#joinEx()*
+  Removes continuation characters and then joins lines as if :[range]join[!]
+  were typed in ex mode.  This function is typically called from the :Join
+  command.
+
+
+vim:tw=78:ts=8:ft=help:norl:

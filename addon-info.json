@@ -1,0 +1,6 @@
+{
+  "name": "conjoin",
+  "description": "Remove line continuation characters when joining",
+  "author": "Trevor Stone <github@trevorstone.org>",
+  "repository": {"type": "git", "url": "git://gihub.com/flwyd/vim-conjoin"}
+}
