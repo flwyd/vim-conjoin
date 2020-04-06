@@ -75,7 +75,9 @@ You can add support for your own filetypes in your `.vimrc`:
 if !exists('g:conjoin_filetypes')
   let g:conjoin_filetypes = {}
 endif
-g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
+g:conjoin_filetypes.intercal = {'leading': '^\s*PLEASE', 'trailing': '\\$'}
+" Or use a literal-Dict in Vim 8.1.1705+
+" g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
 ```
 
 Run `:help conjoin-config` for more details.

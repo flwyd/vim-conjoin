@@ -36,8 +36,9 @@
 " Before joining lines, trailing and/or leading continuation escape characters
 " will be removed from the lines to be joined.
 "
-" gJ  Like J but with joining semantics like the builting |gJ|.
-" {Visual}gJ  Like J but with joining semantics like the builting |v_gJ|.
+" gJ  Like J but with joining semantics like the builtin |gJ|.
+"
+" {Visual}gJ  Like J but with joining semantics like the builtin |v_gJ|.
 
 if exists('did_conjoin') || &cp || version < 700
 	finish
@@ -56,13 +57,11 @@ let did_conjoin = 1
 " "leading" pattern will be matched against each join line (except the first).
 " Make sure to include $ at the end of trailing patterns and ^ at the
 " beginning of leading patterns.  Example use in .vimrc: >
-"
 "   if !exists('g:conjoin_filetypes')
 "     let g:conjoin_filetypes = {}
 "   endif
 "   g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
 " <
-"
 " A buffer-local variable b:conjoin_patterns can replace the global filetype
 " settings.
 "
@@ -77,39 +76,39 @@ endif
 
 " Default continuation character information taken primarily from
 " https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(syntax)#Line_continuation
-let s:default_filetypes = #{
+let s:default_filetypes = {
 			"\ Shell-style languages use trailing backslash
-			\ sh: #{trailing: '\\$'},
-			\ bash: #{trailing: '\\$'},
-			\ csh: #{trailing: '\\$'},
-			\ tcsh: #{trailing: '\\$'},
-			\ zsh: #{trailing: '\\$'},
-			\ c: #{trailing: '\\$'},
-			\ cpp: #{trailing: '\\$'},
-			\ python: #{trailing: '\\$'},
-			\ ruby: #{trailing: '\\$'},
-			\ tcl: #{trailing: '\\$'},
-			\ texmf: #{trailing: '\\$'},
+			\ 'sh': {'trailing': '\\$'},
+			\ 'bash': {'trailing': '\\$'},
+			\ 'csh': {'trailing': '\\$'},
+			\ 'tcsh': {'trailing': '\\$'},
+			\ 'zsh': {'trailing': '\\$'},
+			\ 'c': {'trailing': '\\$'},
+			\ 'cpp': {'trailing': '\\$'},
+			\ 'python': {'trailing': '\\$'},
+			\ 'ruby': {'trailing': '\\$'},
+			\ 'tcl': {'trailing': '\\$'},
+			\ 'texmf': {'trailing': '\\$'},
 			"\ Mathematica/Wolfram Language uses trailing
 			"\ backslash or special character Unicode F3B1 ()
-			\ mma: #{trailing: '[\uF3B1\\]$'},
+			\ 'mma': {'trailing': '[\uF3B1\\]$'},
 			"\ PowerShell uses a trailing backtick
-			\ ps1: #{trailing: '\s`$'},
+			\ 'ps1': {'trailing': '\s`$'},
 			"\ Visual Basic and friends use a trailing underscore
-			\ autoit: #{trailing: '\s_$'},
-			\ cobra: #{trailing: '\s_$'},
-			\ vb: #{trailing: '\s_$'},
+			\ 'autoit': {'trailing': '\s_$'},
+			\ 'cobra': {'trailing': '\s_$'},
+			\ 'vb': {'trailing': '\s_$'},
 			"\ Vim uses leading backslash, :help line-continuation
-			\ vim: #{leading: '^\s*\\'},
+			\ 'vim': {'leading': '^\s*\\'},
 			"\ Fortran uses trailing ampersand and optionally a
 			"\ leading ampersand on the next line
-			\ fortran: #{trailing: '&\s*$', leading: '^\s*&'},
+			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&'},
 			"\ TeX continues lines ending with empty comment %
-			\ tex: #{trailing: '%$'},
-			\ context: #{trailing: '%$'},
-			\ plaintex: #{trailing: '%$'},
+			\ 'tex': {'trailing': '%$'},
+			\ 'context': {'trailing': '%$'},
+			\ 'plaintex': {'trailing': '%$'},
 			"\ m4 trailing dnl comments avoid printing newlines
-			\ m4: #{trailing: '\<dnl$'},
+			\ 'm4': {'trailing': '\<dnl$'},
 			\}
 
 " Populate g:conjoin_filetypes with defaults, respecting user overrides.

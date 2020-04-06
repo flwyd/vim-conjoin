@@ -54,8 +54,9 @@ the lines to be joined.
 Before joining lines, trailing and/or leading continuation escape characters
 will be removed from the lines to be joined.
 
-gJ  Like J but with joining semantics like the builting |gJ|. {Visual}gJ  Like
-J but with joining semantics like the builting |v_gJ|.
+gJ  Like J but with joining semantics like the builtin |gJ|.
+
+{Visual}gJ  Like J but with joining semantics like the builtin |v_gJ|.
 
 ==============================================================================
 CONFIGURATION                                                 *conjoin-config*
@@ -71,13 +72,11 @@ pattern will be matched against each join line (except the first). Make sure
 to include $ at the end of trailing patterns and ^ at the beginning of leading
 patterns.  Example use in .vimrc:
 >
-
   if !exists('g:conjoin_filetypes')
     let g:conjoin_filetypes = {}
   endif
   g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
 <
-
 A buffer-local variable b:conjoin_patterns can replace the global filetype
 settings.
 
