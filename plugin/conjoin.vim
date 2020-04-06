@@ -76,8 +76,27 @@ endif
 
 " Default continuation character information taken primarily from
 " https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(syntax)#Line_continuation
+" Entries are ordered by the continuation pattern they use:
+" Shell-style languages use a trailing backslash (\):
+"   sh bash csh tcsh zsh c cpp python ruby tcl texmf
+" Mathematica/Wolfram Language uses a trailing backslash or the special
+" Unicode character F3B1 ():
+"   mma
+" PowerShell uses a trailing backtick preceeded by whitespace ( `):
+"   ps1
+" Visual Basic etc. use a trailing underscore preceeded by whitespace ( _):
+"   autoit cobra vb
+" Vim uses a leading backslash and optional space, :help line-continuation
+"   vim
+" Fortran 90+ uses a trailing ampersand and optionally a leading ampersand on
+" the next line.  Note that this pattern doesn't require the & to be in column
+" 6, nor does it handle other non-zero column 6 values.
+"   fortran
+" TeX treats an empty trailing comment (%) as a line continuation:
+"   context plaintex tex
+" m4 uses an empty trailing comment (dnl) to avoid outputting newline:
+"   m4
 let s:default_filetypes = {
-			"\ Shell-style languages use trailing backslash
 			\ 'sh': {'trailing': '\\$'},
 			\ 'bash': {'trailing': '\\$'},
 			\ 'csh': {'trailing': '\\$'},
@@ -89,25 +108,16 @@ let s:default_filetypes = {
 			\ 'ruby': {'trailing': '\\$'},
 			\ 'tcl': {'trailing': '\\$'},
 			\ 'texmf': {'trailing': '\\$'},
-			"\ Mathematica/Wolfram Language uses trailing
-			"\ backslash or special character Unicode F3B1 ()
 			\ 'mma': {'trailing': '[\uF3B1\\]$'},
-			"\ PowerShell uses a trailing backtick
 			\ 'ps1': {'trailing': '\s`$'},
-			"\ Visual Basic and friends use a trailing underscore
 			\ 'autoit': {'trailing': '\s_$'},
 			\ 'cobra': {'trailing': '\s_$'},
 			\ 'vb': {'trailing': '\s_$'},
-			"\ Vim uses leading backslash, :help line-continuation
 			\ 'vim': {'leading': '^\s*\\'},
-			"\ Fortran uses trailing ampersand and optionally a
-			"\ leading ampersand on the next line
 			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&'},
-			"\ TeX continues lines ending with empty comment %
 			\ 'tex': {'trailing': '%$'},
 			\ 'context': {'trailing': '%$'},
 			\ 'plaintex': {'trailing': '%$'},
-			"\ m4 trailing dnl comments avoid printing newlines
 			\ 'm4': {'trailing': '\<dnl$'},
 			\}
 
@@ -118,7 +128,7 @@ call extend(g:conjoin_filetypes, s:default_filetypes, 'keep')
 nnoremap <silent> J :<C-U>call conjoin#joinNormal('J')<CR>
 nnoremap <silent> gJ :<C-U>call conjoin#joinNormal('gJ')<CR>
 vnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
-vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gj')<CR>
+vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
 
 ""
 " Like :[range]join[!] [count] [flags] but removes continuation characters.

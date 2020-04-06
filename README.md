@@ -31,7 +31,7 @@ in a block comment.
 Use your favorite plugin manager, e.g.
 
 ```vim
-" vim-plugged:
+" vim-plug:
 Plug 'flwyd/vim-conjoin'
 " Vundle:
 Plugin 'flwyd/vim-conjoin'

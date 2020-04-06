@@ -89,17 +89,19 @@ The default set of configured filetypes is
 ==============================================================================
 FUNCTIONS                                                  *conjoin-functions*
 
-conjoin#joinNormal({cmd}, {J})                          *conjoin#joinNormal()*
+conjoin#joinNormal({cmd})                               *conjoin#joinNormal()*
   Removes continuation characters and then joins lines as if (count) cmd were
   typed in normal mode.  This function is typically called from the J mapping
   set by plugins/conjoin.vim but can be called directly from a user mapping.
-  If cmd is 'gJ', lines are joined without inserting/removing space.
+  {cmd} is the normal-mode join command to execute after modifying lines (i.e.
+  'J' or 'gJ').
 
-conjoin#joinVisual({cmd}, {J})                          *conjoin#joinVisual()*
+conjoin#joinVisual({cmd})                               *conjoin#joinVisual()*
   Removes continuation characters and then joins lines as if cmd were typed in
   visual mode.  This function is typically called from the J mapping set by
-  plugins/conjoin.vim but can be called directly from a user mapping. If cmd
-  is 'gJ', lines are joined without inserting/removing space.
+  plugins/conjoin.vim but can be called directly from a user mapping. {cmd} is
+  the normal-mode join command to execute after modifying lines and restoring
+  the visual selection (i.e. 'J' or 'gJ').
 
 conjoin#joinEx({line1}, {line2}, {range}, {bang}, {qargs})  *conjoin#joinEx()*
   Removes continuation characters and then joins lines as if :[range]join[!]

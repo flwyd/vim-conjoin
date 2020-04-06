@@ -7,9 +7,10 @@
 " Removes continuation characters and then joins lines as if (count) cmd were
 " typed in normal mode.  This function is typically called from the J mapping
 " set by plugins/conjoin.vim but can be called directly from a user mapping.
-" If cmd is 'gJ', lines are joined without inserting/removing space.
+" {cmd} is the normal-mode join command to execute after modifying lines
+" (i.e. 'J' or 'gJ').
 " @public
-function! conjoin#joinNormal(cmd = 'J') abort
+function! conjoin#joinNormal(cmd) abort
 	let l:patterns = s:getDict()
 	if has_key(l:patterns, 'trailing')
 		" continuation character at end of line as in shell
@@ -32,9 +33,10 @@ endfunction
 " Removes continuation characters and then joins lines as if cmd were typed
 " in visual mode.  This function is typically called from the J mapping set by
 " plugins/conjoin.vim but can be called directly from a user mapping.
-" If cmd is 'gJ', lines are joined without inserting/removing space.
+" {cmd} is the normal-mode join command to execute after modifying lines and
+" restoring the visual selection (i.e. 'J' or 'gJ').
 " @public
-function! conjoin#joinVisual(cmd = 'J') abort
+function! conjoin#joinVisual(cmd) abort
 	let l:patterns = s:getDict()
 	if has_key(l:patterns, 'trailing')
 		" continuation character at end of line as in shell
@@ -90,7 +92,7 @@ function! conjoin#joinEx(line1, line2, range, bang, qargs) abort
 	let l:patterns = s:getDict()
 	if has_key(l:patterns, 'trailing')
 		" continuation character at end of line as in shell
-		call s:substituteRange(l:start, l:end, l:patterns.trailing)
+		call s:substituteRange(l:start, l:end - 1, l:patterns.trailing)
 	endif
 	if has_key(l:patterns, 'leading')
 		" continuation character at start of next line as in VimL
