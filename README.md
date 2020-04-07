@@ -81,3 +81,11 @@ g:conjoin_filetypes.intercal = {'leading': '^\s*PLEASE', 'trailing': '\\$'}
 ```
 
 Run `:help conjoin-config` for more details.
+
+## License and Contributing
+
+The code in this project is made available under an Apache 2.0 open source
+license.  Copyright 2020 Google LLC.  This is not an official Google project.
+
+Pull requests to add line continuation support for additional filetypes are
+welcome, but please read the [CONTRIBUTING] document first.
