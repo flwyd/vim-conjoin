@@ -1,0 +1,118 @@
+# Vader tests for line continuation joining with conjoin.
+# Python uses backslash line continuation.
+# Test basic functionality; more coverage in shell.vader.
+
+Given python (A function with a line break):
+  def fun(x, y):
+    if x\
+        and y:
+      print('Something')
+
+Do (Join the condition with J):
+  2ggJ
+
+Expect python:
+  def fun(x, y):
+    if x and y:
+      print('Something')
+
+
+Given python (A function with a line break):
+  def fun(x, y):
+    if x\
+        and y:
+      print('Something')
+
+Do (Join the condition with gJ):
+  2gggJ
+
+Expect python (with six space separation):
+  def fun(x, y):
+    if x      and y:
+      print('Something')
+
+
+Given python (A docstring with backslashes):
+  """conjoin does not\
+  currently do anything special \
+  when a co\ntinuation character
+  \appears in a docstring,\
+    a comment, or other context \
+      where it's not continuing
+    \a line."""
+
+Do (Join the whole string with visual J):
+  vGJ
+
+Expect python (with six space separation):
+  """conjoin does not currently do anything special when a co\ntinuation character \appears in a docstring, a comment, or other context where it's not continuing \a line."""
+
+
+Given python (A docstring with backslashes):
+  """conjoin does not\
+  currently do anything special \
+  when a co\ntinuation character
+  \appears in a docstring,\
+    a comment, or other context \
+      where it's not continuing
+    \a line."""
+
+Do (Join the whole string with visual gJ):
+  vGgJ
+
+Expect python (with awkward space separation):
+  """conjoin does notcurrently do anything special when a co\ntinuation character\appears in a docstring,  a comment, or other context     where it's not continuing  \a line."""
+
+
+Given python (A function with a multi-line break):
+  def fun(x, y):
+    if x\
+        and y \
+        and True or  \
+        False:
+      print('Something')
+    elif \
+      x\
+        or y:
+      print('Something else')
+
+Execute (Join the condition with :Join):
+  redir @a
+  2,5Join p#
+  redir END
+  4Join 3
+# Extra space before False because :join preserves trailing space  
+  AssertEqual "\n".'  2   if x and y and True or  False:', @a
+
+Expect python:
+# Extra space before False because :join preserves trailing space  
+  def fun(x, y):
+    if x and y and True or  False:
+      print('Something')
+    elif x or y:
+      print('Something else')
+
+
+Given python (A function with a multi-line break):
+  def fun(x, y):
+    if x\
+        and y \
+        and True or  \
+        False:
+      print('Something')
+    elif \
+      x\
+        or y:
+      print('Something else')
+
+Execute (Join the condition with :Join!):
+  2,5Join!
+  4
+  Join! 3
+
+Expect python:
+  def fun(x, y):
+    if x      and y       and True or        False:
+      print('Something')
+    elif     x      or y:
+      print('Something else')
