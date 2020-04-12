@@ -102,6 +102,9 @@ function! conjoin#joinEx(line1, line2, range, bang, qargs) abort
 		" :1,1join with no count doesn't join any lines
 		execute l:cmd
 		return
+	elseif l:start == l:end && a:range == 0
+		" :join with no range and no count joins two lines
+		let l:end = l:start + 1
 	endif
 	let l:patterns = s:getDict()
 	if has_key(l:patterns, 'trailing')
