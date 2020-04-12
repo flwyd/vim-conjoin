@@ -127,7 +127,8 @@ function! s:substituteRange(startline, endline, pattern) abort
 	if a:pattern == ''
 		return
 	endif
-	for l:i in range(a:startline, a:endline)
+	let l:end = min([a:endline, line('$')])
+	for l:i in range(a:startline, l:end)
 		let l:text = substitute(getline(l:i), a:pattern, '', '')
 		call setline(l:i, l:text)
 	endfor
