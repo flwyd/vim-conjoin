@@ -1,0 +1,60 @@
+# Vader tests for line continuation joining with conjoin.
+# Visual Basic uses (space-prefixed) underscore line continuation.
+# Test basic functionality; more coverage in shell.vader.
+
+Given vb (A Visual Basic function with continuation):
+  Sub fun(times As Integer)
+  Dim i%
+    For i = 1 _
+        To times
+      Console.WriteLine("Something")
+    Next i
+  End Sub
+
+Do (Join for with J):
+  /For\<CR>J
+
+Expect vb:
+  Sub fun(times As Integer)
+  Dim i%
+    For i = 1 To times
+      Console.WriteLine("Something")
+    Next i
+  End Sub
+
+
+Given vb (A Visual Basic function with multi-line expression):
+  Sub fun(x As Integer, y_ As Integer, _z As Integer)
+  Dim i%, j%, k%
+    i = 1 _
+      + x
+  j = i + _
+    y_
+  k = y_ _
+    + _z
+    Console.WriteLine(i + j + k)
+  End Sub
+
+Do (Join body with visual gJ):
+  2jVGkgJ
+
+Expect vb:
+  Sub fun(x As Integer, y_ As Integer, _z As Integer)
+  Dim i%, j%, k%
+    i = 1    + xj = i +  y_k = y_  + _z  Console.WriteLine(i + j + k)
+  End Sub
+
+Given vb (A long comment with underscores at the end):
+  ' conjoin doesn't treat _
+  ' comment _blocks_ specially
+  ' this is perhaps a bug_
+  ' and maybe it should not strip _
+  ' continuation characters in _
+  ' comments.  This line has a trailing space _ 
+  ' This line does not._
+
+Execute (Join the whole file with :Join):
+  Join 20
+
+Expect vb:
+  ' conjoin doesn't treat ' comment _blocks_ specially ' this is perhaps a bug_ ' and maybe it should not strip ' continuation characters in ' comments.  This line has a trailing space _ ' This line does not._
