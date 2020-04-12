@@ -1,0 +1,153 @@
+# Vader tests for line continuation joining with conjoin.
+# Ruby uses backslash line continuation.
+# Test basic functionality; more coverage in shell.vader.
+
+Given ruby (An expression with a line break):
+  puts 'something'\
+    if x \
+      and y
+
+Do (Join the expression with count J):
+  3J
+
+Expect ruby:
+  puts 'something' if x and y
+
+
+Given ruby (An expression with a line break):
+  puts 'something'\
+    if x \
+      and y
+
+Do (Join the expression with count gJ):
+  3gJ
+
+Expect ruby:
+  puts 'something'  if x     and y
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Do (Join the expression with visual J):
+  2ggv4jJ
+
+Expect ruby:
+  def fun(x, y)
+    puts 'something' 'else' if x and y -x
+  end
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Do (Join the expression with visual gJ):
+  2ggv4jgJ
+
+Expect ruby:
+  def fun(x, y)
+    puts 'something''else'   if x    and y  -x
+  end
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Execute (Join the expression with range :Join):
+  2,6Join
+
+Expect ruby:
+  def fun(x, y)
+    puts 'something' 'else' if x and y -x
+  end
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'some\nthing'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Execute (Join the whole file with :Join count):
+  Join 10
+
+Expect ruby:
+  def fun(x, y) puts 'some\nthing' 'else' if x and y -x end
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Execute (Join the whole file with range :Join!):
+  1,$Join!
+
+Expect ruby:
+  def fun(x, y)  puts 'something''else'   if x    and y  -xend
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Execute (Join parts of file with :Join!):
+  Join!
+  .+2
+  Join!
+
+Expect ruby:
+  def fun(x, y)  puts 'something'\
+  'else' \
+    if x    and y
+    -x
+  end
+
+
+Given ruby (A function with a line break):
+  def fun(x, y)
+    puts 'something'\
+  'else' \
+    if x\
+      and y
+    -x
+  end
+
+Execute (Join the puts expression with line :Join! count):
+  2Join! 4
+
+Expect ruby:
+  def fun(x, y)
+    puts 'something''else'   if x    and y
+    -x
+  end
