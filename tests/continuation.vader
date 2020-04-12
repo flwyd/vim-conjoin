@@ -1,0 +1,138 @@
+# Vader tests for line continuation joining with conjoin.
+# It shouldn't do anything fancy when no filetype is set.
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Do (Join the first and second lines with J):
+  ggJ
+
+Expect:
+  First line \ Second line \
+  Third line
+  Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third \line
+  \Fourth line
+
+Do (Join all lines with count J):
+  gg4J
+
+Expect:
+  First line \ Second line \ Third \line \Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  \ Second line _
+  Third $line
+  Fourth line \
+  END
+
+Do (Join the first four lines with visual J):
+  ggvjjjJ
+
+Expect:
+  First line \ \ Second line _ Third $line Fourth line \
+  END
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Do (Join the first and second lines with gJ):
+  gggJ
+
+Expect:
+  First line \Second line \
+  Third line
+  Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  \Second line \
+     Third line
+  Fourth \\line
+
+Do (Join all lines with count gJ):
+  gg4gJ
+
+Expect:
+  First line \\Second line \   Third lineFourth \\line
+
+Given (Several lines of plain text, space at end of first line):
+  First line \ 
+  \ Second line _
+     Third $line
+  Fourth line \
+  END
+
+Do (Join the first four lines with visual gJ):
+  ggvGkgJ
+
+Expect:
+  First line \ \ Second line _   Third $lineFourth line \
+  END
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Execute (Join the second and third lines with :[range]Join):
+  2,3Join
+
+Expect:
+  First line \
+  Second line \ Third line
+  Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Execute (Join the second and third lines with :Join [count]):
+  2Join 2
+
+Expect:
+  First line \
+  Second line \ Third line
+  Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Execute (Join the second and third lines with :[range]Join!):
+  2,3Join!
+
+Expect:
+  First line \
+  Second line \Third line
+  Fourth line
+
+Given (Several lines of plain text including backslashes):
+  First line \
+  Second line \
+  Third line
+  Fourth line
+
+Execute (Join the second and third lines with :Join! [count]):
+  2Join! 2
+
+Expect:
+  First line \
+  Second line \Third line
+  Fourth line

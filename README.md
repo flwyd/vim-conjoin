@@ -88,4 +88,4 @@ The code in this project is made available under an Apache 2.0 open source
 license.  Copyright 2020 Google LLC.  This is not an official Google project.
 
 Pull requests to add line continuation support for additional filetypes are
-welcome, but please read the [CONTRIBUTING] document first.
+welcome, but please read the [contributing document](CONTRIBUTING.md) first.

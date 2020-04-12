@@ -1,0 +1,290 @@
+# Vader tests for line continuation joining with conjoin.
+# It should remove continuation backslash in shell scripts.
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join first and second lines with J):
+  ggJ
+
+Expect sh:
+  ls -l\
+    -a \
+    /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join first three lines with visual J):
+  ggvjjJ
+
+Expect sh:
+  ls -l -a \
+    /usr/local
+  echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+     -l\
+     -a \
+     /usr/local
+  echo done
+
+Do (join four lines with J):
+  gg4J
+
+Expect sh:
+  ls -l -a /usr/local
+  echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+     -l\
+     -a \
+     /usr/local
+  echo done
+
+Do (join all lines with J):
+  gg10J
+
+Expect sh:
+  ls -l -a /usr/local echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join first through fourth lines with visual gJ):
+  ggv/local\<Enter>gJ
+
+Expect sh (gJ doesn't adjust leading/trailing whitespace):
+  ls   -l  -a   /usr/local
+  echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join first and second lines with gJ):
+  gggJ
+
+Expect sh (gJ doesn't adjust leading/trailing whitespace):
+  ls   -l\
+    -a \
+    /usr/local
+  echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join four lines with gJ):
+  gg4gJ
+
+Expect sh (gJ doesn't adjust leading/trailing whitespace):
+# three spaces (trailing + leading) except between -l and -a because no trailing
+  ls   -l  -a   /usr/local
+  echo done
+
+
+Given sh (a four line ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Do (join all lines with gJ):
+  gg10gJ
+
+Expect sh:
+  ls   -l  -a   /usr/localecho done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join first and second lines with :Join):
+  Join
+
+Expect sh:
+  ls -l\
+    -a \
+    /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join second through fourth lines with range :Join):
+  2,4Join
+
+Expect sh:
+  ls \
+    -l -a /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join second through fourth lines with :Join count):
+  2Join 3
+
+Expect sh:
+  ls \
+    -l -a /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join second through third lines with range :Join!):
+  2
+  Join!
+
+Expect sh (no space trimming):
+  ls \
+    -l  -a \
+    /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join first through third lines with range :Join!):
+  1,3Join!
+
+Expect sh (no space trimming):
+  ls   -l  -a \
+    /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join first through fourth lines with :Join! count):
+  Join! 4
+
+Expect sh (no space trimming):
+  ls   -l  -a   /usr/local
+  echo done
+
+
+Given sh (four lines of an ls command, note spacing):
+  ls \
+    -l\
+    -a \
+    /usr/local
+  echo done
+
+Execute (join first through fourth lines with :Join! count):
+  Join! 4
+
+Expect sh (no space trimming):
+  ls   -l  -a   /usr/local
+  echo done
+
+
+Given sh (lines with non-trailing backslash):
+  echo \ word
+  \' single quote
+  echo "Washington $1 bill"
+  echo special character \`
+  echo $'embedded newline\n'
+
+Execute (join all lines with :Join):
+  1,$Join
+
+Expect sh (no space trimming):
+  echo \ word \' single quote echo "Washington $1 bill" echo special character \` echo $'embedded newline\n'
+
+
+Given sh (lines with non-trailing backslash):
+  echo \ word
+  \' single quote
+  echo "Washington $1 bill"
+  echo special character \`
+  echo $'embedded newline\n'
+
+Execute (join all lines with :Join):
+  1,$Join
+
+Expect sh (no space trimming):
+  echo \ word \' single quote echo "Washington $1 bill" echo special character \` echo $'embedded newline\n'
+
+
+Given sh (lines with unprintable characters):
+  echo\
+  "start<SOH>header"\
+  "acknowledge<ACK>me"
+
+Execute (:Join with flags):
+# Replace control codes with ASCII values
+  %s/<SOH>/\="\x01"/
+  %s/<ACK>/\="\x06"/
+  1
+  redir @a
+  Join 3 #l
+  redir END
+  AssertEqual "\n".'  1 echo "start^Aheader" "acknowledge^Fme"$', @a
+# Remove special characters so that Expect is easier to type
+  %s/\%x01/<SOH>/
+  %s/\%x06/<ACK>/
+
+Expect sh (line joined and printed):
+  echo "start<SOH>header" "acknowledge<ACK>me"
+

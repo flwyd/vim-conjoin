@@ -1,0 +1,67 @@
+#!env zsh
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Script to run Vader scripts for a vim plugin.  Expects to be in tests/ dir.
+# With no arguments, will run tests/*.vader; otherwise will run all arguments.
+# Environment variables:
+# VIM_CMD - vim command to run, defaults to "vim"
+# VADER_PLUGIN - path to plugin directory for vader.vim
+# VADER - vim command to run tests, defaults to "Vader!"
+#         use "Vader" to stay in vim after running tests
+
+# Set up environment
+# Tests to run
+if [ $# -eq 0 ]; then
+	testglobs="$(dirname $0)/*.vader"
+else
+	testglobs="$@"
+fi
+# Set thisplugin to the directory where tests are being run
+# remove tests/scriptname from absolute path
+thisplugin="${0:P:h:h}"
+# Vim executable, use $VIM_CMD if set
+vim="${VIM_CMD-vim}"
+# Set VADER='Vader' to examine failures after running
+vader="${VADER-Vader!}"
+# Path to vim plugin directory, $VADER_PLUGIN if set
+if [ -n "$VADER_PLUGIN" ]; then
+	vaderpath="${VADER_PLUGIN}/vader.vim"
+else
+	for p in ~/.vim/plugged ~/.vim/bundle ~/.vim/vim-addons ; do
+		if [ -d "$p/vader.vim" ]; then
+			vaderpath="${p}/vader.vim"
+			break
+		fi
+	done
+	if [ -z "$vaderpath" ]; then
+		echo "Could not find plugin directory with vader.vim, set $VADER_PLUGIN"
+		exit 1
+	fi
+fi
+
+# Minimal vimrc for testing
+vimrc="filetype off
+set runtimepath+=${vaderpath}
+set runtimepath+=${thisplugin}
+filetype plugin indent on
+syntax enable"
+
+# Run tests with vim
+echo "Running Vader tests with $vim on $testglobs with .vimrc="
+echo $vimrc
+$vim -N -u <(echo "$vimrc") -c ":$vader $testglobs"
+result=$?
+if [ $result -eq 0 ]; then echo "PASS"; else echo "FAIL"; fi
+exit $result

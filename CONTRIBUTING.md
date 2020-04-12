@@ -21,8 +21,18 @@ Most changes should be discussed in a GitHub issue first.  This plugin should
 do one thing well—intuitive line joining.  I may therefore reject feature
 requests that stray from that focus.
 
-Pull requests are welcome to fix vim compatibility issues or to support
-continuation lines for additional languages.
+Pull requests are welcome to fix bugs or vim compatibility issues, or to support
+continuation lines for additional languages.  I don’t know how to write valid
+code all of the supported languages, so it’s possible that the patterns are
+incorrect.  I would love to improve them!
+
+vim-conjoin uses [vader.vim](https://github.com/junegunn/vader.vim) for
+testing.  Please include a unit test with any pull request.  You can run all
+tests with `path/to/vim-conjoin/tests/runtests`.  This script can also run
+specific `.vader` test files as arguments and accepts `VIM_CMD` and
+`VADER_PLUGIN` environment variables to test with a non-default `vim` version or
+specify the path to `vader.vim`.  To interactively inspect test results, run
+`VADER=Vader tests/runtests`.
 
 ## Community Guidelines
 
