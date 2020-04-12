@@ -24,7 +24,7 @@ With `conjoin`, running join commands on the same script will produce
 ```
 
 Note that vim already removes leading comment characters when joining lines
-in a block comment.
+in a block comment with `set formatoptions+=j`.
 
 ## Installation
 
