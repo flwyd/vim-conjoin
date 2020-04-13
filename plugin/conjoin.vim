@@ -102,6 +102,8 @@ endif
 "   autoit cobra vb
 " Vim uses a leading backslash and optional space, :help line-continuation
 "   vim
+" Vroom vim testing framework uses a leading pipe preceeded by space:
+"   vroom
 " Fortran 90+ uses a trailing ampersand and optionally a leading ampersand on
 " the next line.  Note that this pattern doesn't require the & to be in column
 " 6, nor does it handle other non-zero column 6 values.

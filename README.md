@@ -67,6 +67,7 @@ or `git clone https://github.com/flwyd/vim-conjoin` and set
 *   `texmf`
 *   `vb`
 *   `vim`
+*   `vroom`
 *   `zsh`
 
 You can add support for your own filetypes in your `.vimrc`:
