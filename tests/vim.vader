@@ -1,0 +1,55 @@
+# Vader tests for line continuation joining with conjoin.
+# Vim uses backslashes (with optional leading space) for line continuation
+# because trailing backslashes would be ambiguous.
+# A comment starting with "\ can be used as in a continuation sequence,
+# but conjoin doesn't handle that case specially.
+# Test basic functionality; more coverage in shell.vader.
+
+Given vim (Some vimscript with line continuations):
+  echo 'foo'
+    \ 'bar'
+    "\ comment
+    \"baz\nqux"
+
+Do (Join all lines with J):
+  4J
+
+Expect vim:
+  echo 'foo' 'bar' "\ comment "baz\nqux"
+
+
+Given vim (A vim function with continuation):
+  function foo(x, y)
+    if a:x
+  \> a:y
+      echo
+        \ a:x
+      \   a:y
+    endif
+  endfunction
+
+Do (Join body with visual gJ):
+  jvGkgJ
+
+Expect vim:
+  function foo(x, y)
+    if a:x> a:y    echo a:x   a:y  endif
+  endfunction
+
+
+Given vim (An extended list):
+  let x
+  \= [
+    \'apples',
+    \'bananas'
+    \, 'cherries',
+    "\ some people don't like durian
+    "\but I think they're great
+    \ 'durians'
+  \ ]
+
+Execute (Join the whole expression with :Join! count):
+  Join! 9
+
+Expect vim:
+  let x= ['apples','bananas', 'cherries',  "\ some people don't like durian  "\but I think they're great 'durians' ]
