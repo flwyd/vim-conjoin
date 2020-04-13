@@ -53,3 +53,71 @@ Execute (Join the whole expression with :Join! count):
 
 Expect vim:
   let x= ['apples','bananas', 'cherries',  "\ some people don't like durian  "\but I think they're great 'durians' ]
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Do (Join with J):
+  J
+
+Expect vim:
+  nnoremap <Leader>J :join<CR>
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Do (Join with gJ):
+  gJ
+
+Expect vim:
+  nnoremap <Leader>J:join<CR>
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Do (Join with visual J):
+  VJ
+
+Expect vim:
+" One-line visual J is same as non-visual J
+  nnoremap <Leader>J :join<CR>
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Do (Join with visual gJ):
+  vgJ
+
+Expect vim:
+" One-line visual gJ is same as non-visual gJ
+  nnoremap <Leader>J:join<CR>
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Execute (Join with :Join):
+  Join
+
+Expect vim:
+  nnoremap <Leader>J :join<CR>
+
+
+Given vim (Two line command):
+  nnoremap <Leader>J
+    \:join<CR>
+
+Execute (Join with :Join!):
+  Join!
+
+Expect vim:
+  nnoremap <Leader>J:join<CR>

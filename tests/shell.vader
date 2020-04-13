@@ -288,3 +288,46 @@ Execute (:Join with flags):
 Expect sh (line joined and printed):
   echo "start<SOH>header" "acknowledge<ACK>me"
 
+
+Given sh (Two-line command):
+  echo\
+  tc
+
+Do (Join with J):
+  J
+
+Expect:
+  echo tc
+
+
+Given sh (Two-line command):
+  echo\
+  tc
+
+Do (Join with gJ):
+  gJ
+
+Expect:
+  echotc
+
+
+Given sh (Two-line command):
+  echo\
+  tc
+
+Execute (Join with :Join):
+  Join
+
+Expect:
+  echo tc
+
+
+Given sh (Two-line command):
+  echo\
+  tc
+
+Execute (Join with :Join!):
+  Join!
+
+Expect:
+  echotc

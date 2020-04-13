@@ -36,7 +36,7 @@ function! conjoin#joinNormal(cmd) abort
 	if has_key(l:patterns, 'leading')
 		" continuation character at start of next line as in VimL
 		let l:start = line('.') + 1
-		let l:end = l:start + v:count1 - 2
+		let l:end = max([l:start + v:count1 - 2, l:start])
 		call s:substituteRange(l:start, l:end, l:patterns.leading)
 	endif
 	execute 'normal! ' . v:count1 . a:cmd
@@ -63,6 +63,9 @@ function! conjoin#joinVisual(cmd) abort
 		let l:end = line("'>")
 		" handle single-line visual join
 		let l:start = min([line("'<") + 1, l:end])
+		if line("'<") == line("'>")
+			let l:end = l:start + 1
+		endif
 		call s:substituteRange(l:start, l:end, l:patterns.leading)
 	endif
 	" gv to restore visual range
