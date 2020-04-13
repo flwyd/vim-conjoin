@@ -1,0 +1,52 @@
+# Vader tests for line continuation joining with conjoin.
+# TeX treats an empty percent comment as a continuation line.
+# Test basic functionality; more coverage in shell.vader.
+
+Given tex (Command with continuation):
+  \command[foo=1,%
+    bar=2,%
+    baz=3]% a comment
+  word
+
+Do (Join everything with gJ):
+  10gJ
+
+Expect tex:
+  \command[foo=1,  bar=2,  baz=3]% a commentword
+
+
+Given tex (Command with continuation):
+  \begin{document}
+  \command[foo=1,%
+    bar=2,%
+    baz=3]% a comment
+  word
+  \end{document}
+
+Do (Join command with visual J):
+  jv/a c\<CR>J
+
+Expect tex:
+  \begin{document}
+  \command[foo=1, bar=2, baz=3]% a comment
+  word
+  \end{document}
+
+
+Given tex (Silly comment example):
+  %% Even if the block
+  % is just full of comments
+  %
+  % blank % comments
+  % will be deleted
+  %
+  %
+  % but others will keep %
+  % characters unless they're\
+  % at the end.%
+
+Execute (Join the whole thing with :Join!):
+  1,$Join!
+
+Expect tex:
+  %% Even if the block% is just full of comments% blank % comments% will be deleted% but others will keep % characters unless they're\% at the end.%
