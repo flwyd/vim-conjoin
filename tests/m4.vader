@@ -1,0 +1,20 @@
+# Vader tests for line continuation joining with conjoin.
+# m4 uses an empty dnl comment to prevent outputting a newline.
+# conjoin will delete that dnl when joining, but leaves non-empty
+# comments in place.
+# Test basic functionality; more coverage in shell.vader.
+
+Given m4 (A comment mix):
+  foo(1)dnl
+  dnl
+  bar(3)dnl
+  baz(4)dnl comment
+  qux(5)dnl
+  morednl
+  end(7)dnl
+
+Do (Join everything with gJ):
+  7gJ
+
+Expect m4:
+  foo(1)bar(3)baz(4)dnl commentqux(5)morednlend(7)dnl
