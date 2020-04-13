@@ -1,0 +1,56 @@
+# Vader tests for line continuation joining with conjoin.
+# Modern Fortran uses ampersand at the end of a line to continue.
+# A leading (optionally space-leading) ampersand on the next line is also
+# allowed.  conjoin does not support column 6 as a continuation indicator.
+# Test basic functionality; more coverage in shell.vader.
+
+Given fortran (Line with continuations):
+  i = 1 &
+  & + 2 &
+    + 3
+  print *, i, ' B&W'
+
+Do (Join all four lines):
+  4J
+
+Expect fortran:
+  i = 1 + 2 + 3 print *, i, ' B&W'
+
+
+Given fortran (Line with continuations, line 2 has trailing space):
+        i = 1&
+       &+ 2   & 
+  label + 3
+        print *, i, ' B&W'
+
+Do (Join all lines with visual gJ):
+  VGgJ
+
+Expect fortran:
+        i = 1+ 2   label + 3      print *, i, ' B&W'
+
+
+Given fortran (Program with continuations):
+  program myprog
+  integer :: i
+  
+        i =&
+  label&1 +&
+        2 +&
+        3
+  print write (*,*) 'i is ',    &    
+       &i, ' and I am ',&
+  ! a comment
+
+Execute (Join the two expressions with :Join):
+  4,7Join
+  +
+  Join 3
+
+Expect fortran:
+# Big space in last line because :join doesn't trim trailing space
+  program myprog
+  integer :: i
+  
+        i = label&1 + 2 + 3
+  print write (*,*) 'i is ',    i, ' and I am ', ! a comment
