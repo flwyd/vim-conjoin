@@ -1,0 +1,20 @@
+# Vader tests for line continuation joining with conjoin.
+# Vroom vim tests use a leading pipe as a continuation of the previous line.
+# Test basic functionality; more coverage in shell.vader and vim.vader.
+
+Given vroom (A vroom test with continuations, hello has trailing space):
+  A vroom test
+    > i
+    |Hello 
+    |World
+    |<ESC>
+    Hell
+    |o World
+
+Do (Join into input and output with gJ):
+  j4gJjgJ
+
+Expect vroom:
+  A vroom test
+    > iHello World<ESC>
+    Hello World

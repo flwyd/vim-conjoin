@@ -128,6 +128,7 @@ let s:default_filetypes = {
 			\ 'cobra': {'trailing': '\s_$'},
 			\ 'vb': {'trailing': '\s_$'},
 			\ 'vim': {'leading': '^\s*\\'},
+			\ 'vroom': {'leading': '\v^\s*\|'},
 			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&'},
 			\ 'tex': {'trailing': '%$'},
 			\ 'context': {'trailing': '%$'},
