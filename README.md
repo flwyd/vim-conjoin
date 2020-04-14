@@ -1,4 +1,5 @@
 # vim-conjoin
+
 Remove continuation characters when joining lines in vim.
 
 `conjoin` is a [Vim](https://vim.org/) plugin that handles line joining in the
@@ -41,6 +42,36 @@ VAMActivate github:flwyd/vim-conjoin
 
 or `git clone https://github.com/flwyd/vim-conjoin` and set
 `runtimepath+=/path/to/vim-conjoin` in your `.vimrc`.
+
+or as a vim8 package:
+
+```sh
+mkdir -p ~/vim/pack/conjoin/start
+cd ~/vim/pack/conjoin/start
+git clone https://github.com/flwyd/vim-conjoin
+```
+
+## Mappings
+
+By default `conjoin` will create mappings for `J` and `gJ` and create a `:Join`
+command.  If those keys are already mapped, e.g. by
+[splitjoin](https://github.com/AndrewRadev/splitjoin.vim), then `conjoin` will
+call the prior mapping after removing continuation characters.  To get this
+behavior, ensure the plugging defining the other mapping is _before_ `conjoin`
+in `runtimepath`, e.g.
+
+```vim
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'flwyd/vim-conjoin'
+```
+
+If you would prefer different mappings for `conjoin` behavior, define them in
+your `.vimrc`:
+
+```vim
+let g:conjoin_map_J = '<Leader>z'
+let g:conjoin_map_gJ = '<Leader>x'
+```
 
 ## Filetype support
 

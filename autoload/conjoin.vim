@@ -18,11 +18,11 @@
 
 
 ""
-" Removes continuation characters and then joins lines as if (count) cmd were
-" typed in normal mode.  This function is typically called from the J mapping
-" set by plugins/conjoin.vim but can be called directly from a user mapping.
-" {cmd} is the normal-mode join command to execute after modifying lines
-" (i.e. 'J' or 'gJ').
+" Removes continuation characters and then joins lines as if (count) {cmd}
+" were typed in normal mode.  If cmd is empty (or otherwise neither J nor gJ)
+" then no command will be performed to join the lines, with the expectation
+" that a mapping will initiate its own join operation.  This function is
+" typically called from the from a mapping established in plugin/conjoin.vim.
 " @public
 function! conjoin#joinNormal(cmd) abort
 	let l:patterns = s:getDict()
@@ -39,16 +39,19 @@ function! conjoin#joinNormal(cmd) abort
 		let l:end = max([l:start + v:count1 - 2, l:start])
 		call s:substituteRange(l:start, l:end, l:patterns.leading)
 	endif
-	execute 'normal! ' . v:count1 . a:cmd
+	" If cmd is J/gJ, execute that command; otherwise caller will do it.
+	if a:cmd ==# 'J' || a:cmd ==# 'gJ'
+		execute 'normal! ' . v:count1 . a:cmd
+	endif
 endfunction
 
 
 ""
-" Removes continuation characters and then joins lines as if cmd were typed
-" in visual mode.  This function is typically called from the J mapping set by
-" plugins/conjoin.vim but can be called directly from a user mapping.
-" {cmd} is the normal-mode join command to execute after modifying lines and
-" restoring the visual selection (i.e. 'J' or 'gJ').
+" Removes continuation characters and then joins lines as if (count) {cmd}
+" were typed in visual mode.  If cmd is empty (or otherwise neither J nor gJ)
+" then no command will be performed to join the lines, with the expectation
+" that a mapping will initiate its own join operation.  This function is
+" typically called from the from a mapping established in plugin/conjoin.vim.
 " @public
 function! conjoin#joinVisual(cmd) abort
 	let l:patterns = s:getDict()
@@ -69,7 +72,11 @@ function! conjoin#joinVisual(cmd) abort
 		call s:substituteRange(l:start, l:end, l:patterns.leading)
 	endif
 	" gv to restore visual range
-	execute 'normal! gv' . a:cmd
+	execute 'normal! gv'
+	" If cmd is J/gJ, execute that command; otherwise caller will do it.
+	if a:cmd ==# 'J' || a:cmd ==# 'gJ'
+		execute 'normal! ' . a:cmd
+	endif
 endfunction
 
 

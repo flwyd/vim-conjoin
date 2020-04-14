@@ -28,8 +28,10 @@ With conjoin, running join commands on the same script will produce
 >
   cat file.txt | sort | uniq -c
 <
+(|gJ| does the same but doesn't adjust leading/trailing space.)
+
 Note that vim already removes leading comment characters when joining lines in
-a block comment.
+a block comment when |formatoptions| contains the 'j' flag.
 
 conjoin works with several programming languages by default, see
 |conjoin-config| for details.
@@ -46,17 +48,30 @@ COMMANDS                                                    *conjoin-commands*
 ==============================================================================
 MAPPINGS                                                    *conjoin-mappings*
 
-J  Join [count] lines, as with the builtin |J| command.  Before joining lines,
-trailing and/or leading continuation escape characters will be removed from
-the lines to be joined.
+*conjoin-J* J  Join [count] lines, as with the builtin |J| command.  Before
+joining lines, trailing and/or leading continuation escape characters will be
+removed from the lines to be joined.
 
-{Visual}J  Join the highlighted lines, as with the builtin |v_J| command.
-Before joining lines, trailing and/or leading continuation escape characters
-will be removed from the lines to be joined.
+*conjoin-v_J* {Visual}J  Join the highlighted lines, as with the builtin |v_J|
+command. Before joining lines, trailing and/or leading continuation escape
+characters will be removed from the lines to be joined.
 
-gJ  Like J but with joining semantics like the builtin |gJ|.
+*conjoin-gJ* gJ  Like J but with joining semantics like the builtin |gJ|.
 
-{Visual}gJ  Like J but with joining semantics like the builtin |v_gJ|.
+*conjoin-v_gJ* {Visual}gJ  Like J but with joining semantics like the builtin
+|v_gJ|.
+
+If these keys have existing mappings, conjoin will call the prior mapping
+after removing continuation characters.  This allows conjoin to delegate gJ to
+the |splitjoin| plugin as long as splitjoin appears before conjoin in
+|runtimepath|.
+
+You can use different mappings for conjoin (not touching J/gJ) by setting the
+appropriate variable:
+>
+  let g:conjoin_map_J = '<Leader>z'
+  let g:conjoin_map_gJ = '<Leader>x'
+<
 
 ==============================================================================
 CONFIGURATION                                                 *conjoin-config*
@@ -90,18 +105,18 @@ The default set of configured filetypes is
 FUNCTIONS                                                  *conjoin-functions*
 
 conjoin#joinNormal({cmd})                               *conjoin#joinNormal()*
-  Removes continuation characters and then joins lines as if (count) cmd were
-  typed in normal mode.  This function is typically called from the J mapping
-  set by plugins/conjoin.vim but can be called directly from a user mapping.
-  {cmd} is the normal-mode join command to execute after modifying lines (i.e.
-  'J' or 'gJ').
+  Removes continuation characters and then joins lines as if (count) {cmd}
+  were typed in normal mode.  If cmd is empty (or otherwise neither J nor gJ)
+  then no command will be performed to join the lines, with the expectation
+  that a mapping will initiate its own join operation.  This function is
+  typically called from the from a mapping established in plugin/conjoin.vim.
 
 conjoin#joinVisual({cmd})                               *conjoin#joinVisual()*
-  Removes continuation characters and then joins lines as if cmd were typed in
-  visual mode.  This function is typically called from the J mapping set by
-  plugins/conjoin.vim but can be called directly from a user mapping. {cmd} is
-  the normal-mode join command to execute after modifying lines and restoring
-  the visual selection (i.e. 'J' or 'gJ').
+  Removes continuation characters and then joins lines as if (count) {cmd}
+  were typed in visual mode.  If cmd is empty (or otherwise neither J nor gJ)
+  then no command will be performed to join the lines, with the expectation
+  that a mapping will initiate its own join operation.  This function is
+  typically called from the from a mapping established in plugin/conjoin.vim.
 
 conjoin#joinEx({line1}, {line2}, {range}, {bang}, {qargs})  *conjoin#joinEx()*
   Removes continuation characters and then joins lines as if :[range]join[!]

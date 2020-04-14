@@ -34,27 +34,44 @@
 " With conjoin, running join commands on the same script will produce >
 "   cat file.txt | sort | uniq -c
 " <
+" (|gJ| does the same but doesn't adjust leading/trailing space.)
+"
 " Note that vim already removes leading comment characters when joining lines
-" in a block comment.
+" in a block comment when |formatoptions| contains the 'j' flag.
 "
 " conjoin works with several programming languages by default, see
 " @section(config) for details.
 
 ""
 " @section Mappings, mappings
+" *conjoin-J*
 " J  Join [count] lines, as with the builtin |J| command.  Before joining
 " lines, trailing and/or leading continuation escape characters will be
 " removed from the lines to be joined.
 "
+" *conjoin-v_J*
 " {Visual}J  Join the highlighted lines, as with the builtin |v_J| command.
 " Before joining lines, trailing and/or leading continuation escape characters
 " will be removed from the lines to be joined.
 "
+" *conjoin-gJ*
 " gJ  Like J but with joining semantics like the builtin |gJ|.
 "
+" *conjoin-v_gJ*
 " {Visual}gJ  Like J but with joining semantics like the builtin |v_gJ|.
+"
+" If these keys have existing mappings, conjoin will call the prior mapping
+" after removing continuation characters.  This allows conjoin to delegate gJ
+" to the |splitjoin| plugin as long as splitjoin appears before conjoin in
+" |runtimepath|.
+"
+" You can use different mappings for conjoin (not touching J/gJ) by setting
+" the appropriate variable: >
+"   let g:conjoin_map_J = '<Leader>z'
+"   let g:conjoin_map_gJ = '<Leader>x'
+" <
 
-if exists('did_conjoin') || &cp || version < 700
+if exists('did_conjoin') || version < 700
 	finish
 endif
 let did_conjoin = 1
@@ -141,11 +158,41 @@ let s:default_filetypes = {
 " Populate g:conjoin_filetypes with defaults, respecting user overrides.
 call extend(g:conjoin_filetypes, s:default_filetypes, 'keep')
 
-" Map J in normal and visual mode.
-nnoremap <silent> J :<C-U>call conjoin#joinNormal('J')<CR>
-nnoremap <silent> gJ :<C-U>call conjoin#joinNormal('gJ')<CR>
-vnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
-vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
+" Define a normal/visual mode mapping, respecting existing mapping.
+" {mode} is 'n' or 'v', {mapping} is the key(s) to map, {default} is either
+" 'J' or 'gJ' to indicicate command behavior.
+function! s:mapping(mode, mapping, default) abort
+	let l:fname = {'n': 'joinNormal', 'v': 'joinVisual'}[a:mode]
+	" See if mapping is already defined.  Returns empty string for native vim.
+	let l:prevmap = maparg(a:mapping, a:mode)
+	" If replacing an existing J/gJ mapping, call function with empty string
+	" (don't execute cmd) and append the previous mapping to the end of this
+	" one, which is easier than :exe on an arbitrary mapping string.  If
+	" prevmap is empty (not replacing a mapping) or replacing a mapping other
+	" than J/gJ (who knows what original does), function will call J/gJ in the
+	" appropriate mode.
+	let l:cmd = empty(l:prevmap) || a:mapping !=# a:default ? a:default : ''
+	execute printf("%snoremap <silent> %s :<C-U>call conjoin#%s('%s')<CR>%s",
+		\ a:mode, a:mapping, l:fname, l:cmd, l:prevmap)
+endfunction
+
+" User mapping override for normal/visual J.
+if !exists('g:conjoin_map_J')
+	let g:conjoin_map_J = 'J'
+endif
+" User mapping override for normal/visual gJ.
+if !exists('g:conjoin_map_gJ')
+	let g:conjoin_map_gJ = 'gJ'
+endif
+
+" nnoremap <silent> J :<C-U>call conjoin#joinNormal('J')<CR>
+call s:mapping('n', g:conjoin_map_J, 'J')
+" nnoremap <silent> gJ :<C-U>call conjoin#joinNormal('gJ')<CR>
+call s:mapping('n', g:conjoin_map_gJ, 'gJ')
+" vnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
+call s:mapping('v', g:conjoin_map_J, 'J')
+" vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
+call s:mapping('v', g:conjoin_map_gJ, 'gJ')
 
 ""
 " Like :[range]join[!] [count] [flags] but removes continuation characters.
