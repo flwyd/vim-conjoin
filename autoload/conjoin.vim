@@ -26,19 +26,9 @@
 " @public
 function! conjoin#joinNormal(cmd) abort
 	let l:patterns = s:getDict()
-	if has_key(l:patterns, 'trailing')
-		" continuation character at end of line as in shell
-		let l:start = line('.')
-		" subtract 2: one for start line, one for final line
-		let l:end = max([l:start + v:count1 - 2, l:start])
-		call s:substituteRange(l:start, l:end, l:patterns.trailing)
-	endif
-	if has_key(l:patterns, 'leading')
-		" continuation character at start of next line as in VimL
-		let l:start = line('.') + 1
-		let l:end = max([l:start + v:count1 - 2, l:start])
-		call s:substituteRange(l:start, l:end, l:patterns.leading)
-	endif
+	" Always join at least 2 lines: J == 1J == 2J
+	call s:substituteRange(line('.'), line('.') + max([v:count - 1, 1]),
+				\ get(l:patterns, 'trailing', ''), get(l:patterns, 'leading', ''))
 	" If cmd is J/gJ, execute that command; otherwise caller will do it.
 	if a:cmd ==# 'J' || a:cmd ==# 'gJ'
 		execute 'normal! ' . v:count1 . a:cmd
@@ -55,22 +45,9 @@ endfunction
 " @public
 function! conjoin#joinVisual(cmd) abort
 	let l:patterns = s:getDict()
-	if has_key(l:patterns, 'trailing')
-		" continuation character at end of line as in shell
-		let l:start = line("'<")
-		let l:end = max([line("'>") - 1, l:start])
-		call s:substituteRange(l:start, l:end, l:patterns.trailing)
-	endif
-	if has_key(l:patterns, 'leading')
-		" continuation character at start of next line as in VimL
-		let l:end = line("'>")
-		" handle single-line visual join
-		let l:start = min([line("'<") + 1, l:end])
-		if line("'<") == line("'>")
-			let l:end = l:start + 1
-		endif
-		call s:substituteRange(l:start, l:end, l:patterns.leading)
-	endif
+	" Always join at least 2 lines: vJ is the same as vjJ
+	call s:substituteRange(line("'<"), max([line("'>"), line("'<") + 1]),
+				\ get(l:patterns, 'trailing', ''), get(l:patterns, 'leading', ''))
 	" gv to restore visual range
 	execute 'normal! gv'
 	" If cmd is J/gJ, execute that command; otherwise caller will do it.
@@ -117,29 +94,30 @@ function! conjoin#joinEx(line1, line2, range, bang, qargs) abort
 		let l:end = l:start + 1
 	endif
 	let l:patterns = s:getDict()
-	if has_key(l:patterns, 'trailing')
-		" continuation character at end of line as in shell
-		call s:substituteRange(l:start, l:end - 1, l:patterns.trailing)
-	endif
-	if has_key(l:patterns, 'leading')
-		" continuation character at start of next line as in VimL
-		" Start on second line
-		call s:substituteRange(l:start + 1, max([l:end, l:start + 1]), l:patterns.leading)
-	endif
+	call s:substituteRange(l:start, l:end,
+				\ get(l:patterns, 'trailing', ''), get(l:patterns, 'leading', ''))
 	execute l:cmd
 endfunction
 
 
 ""
-" Removes {pattern} in each line from {startline} to {endline} inclusive.
+" Removes {trailpat} from all lines from {linefirst} to {linelast}-1 and
+" removes {leadpat} from all lines from {linefirst}+1 to {linelast}.
 " @private
-function! s:substituteRange(startline, endline, pattern) abort
-	if a:pattern == ''
+function! s:substituteRange(linefirst, linelast, trailpat, leadpat) abort
+	if empty(a:leadpat) && empty(a:trailpat)
 		return
 	endif
-	let l:end = min([a:endline, line('$')])
-	for l:i in range(a:startline, l:end)
-		let l:text = substitute(getline(l:i), a:pattern, '', '')
+	for l:i in range(a:linefirst, a:linelast)
+		let l:text = getline(l:i)
+		" Apply trailing pattern to all lines but the last
+		if l:i < a:linelast && !empty(a:trailpat)
+			let l:text = substitute(l:text, a:trailpat, '', '')
+		endif
+		" Apply leading pattern to all lines but the first
+		if l:i > a:linefirst && !empty(a:leadpat)
+			let l:text = substitute(l:text, a:leadpat, '', '')
+		endif
 		call setline(l:i, l:text)
 	endfor
 endfunction
