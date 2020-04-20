@@ -1,0 +1,53 @@
+# Vader tests for line continuation joining with conjoin.
+# C/C++ uses backslash line continuation for preprocessor directives (conjoin
+# applies this to all lines) and applies string literal concatenation with no
+# intervening operator.
+# Test basic functionality; more coverage in python.vader.
+
+Given c (A preprocessor directive with a continuation line):
+  #define TAU\
+  6.2832
+
+Do (Join lines with J):
+  J
+
+Expect c:
+  #define TAU 6.2832
+
+
+Given cpp (A preprocessor directive with string concatenation):
+  #define GREETING\
+  	"Hello" \
+  	", World!"
+  #define PROGRAM cout << GREETING;
+
+Do (Join lines with visual J):
+  vjjJ
+
+Expect cpp:
+  #define GREETING "Hello, World!"
+  #define PROGRAM cout << GREETING;
+
+
+Given c (A simple program):
+  #include <stdio.h>
+
+  int main(char** argv, int argc) { \
+    printf("%d\t"
+           "%s\n"
+           "\t%s\t%s",
+           argc,
+           argv[0],
+           "\"",
+           "\\");
+  }
+  /* EOF */
+
+Execute (Join main with range :Join):
+  3,11Join
+
+Expect c:
+  #include <stdio.h>
+
+  int main(char** argv, int argc) { printf("%d\t%s\n\t%s\t%s", argc, argv[0], "\"", "\\"); }
+  /* EOF */

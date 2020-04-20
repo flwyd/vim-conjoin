@@ -1,6 +1,6 @@
 # vim-conjoin
 
-Remove continuation characters when joining lines in vim.
+Remove continuation characters and merge string literals when joining lines in vim.
 
 `conjoin` is a [Vim](https://vim.org/) plugin that handles line joining in the
 presence of line continuation characters.  Vim's normal behavior for `J` and
@@ -21,7 +21,29 @@ cat file.txt \ | sort \ | uniq -c
 With `conjoin`, running join commands on the same script will produce
 
 ```sh
-  cat file.txt | sort | uniq -c
+cat file.txt | sort | uniq -c
+```
+
+Long string literals are often broken up in a similar way:
+
+```python
+print('Lorem '
+      'ipsum '
+      'dolor ' +
+      'sic '
+      + 'amet')
+```
+
+which would normally join to
+
+```python
+print('Lorem ' 'ipsum ' 'dolor ' + 'sic ' + 'amet')
+```
+
+With conjoin, `5J` will cause the literal string will be merged as
+
+```python
+print('Lorem ipsum dolor sic amet')
 ```
 
 Note that vim already removes leading comment characters when joining lines
@@ -77,29 +99,57 @@ let g:conjoin_map_gJ = '<Leader>x'
 
 `conjoin` currently supports line continuation patterns for the following types:
 
-*   `autoit`
-*   `bash`
-*   `c`
-*   `cobra`
-*   `context`
-*   `cpp`
-*   `csh`
-*   `fortran`
-*   `m4`
-*   `mma`
-*   `plaintex`
-*   `ps1`
-*   `python`
-*   `ruby`
-*   `sh`
-*   `tcl`
-*   `tcsh`
-*   `tex`
-*   `texmf`
-*   `vb`
-*   `vim`
-*   `vroom`
-*   `zsh`
+* `applescript`
+* `autoit`
+* `bash`
+* `c`
+* `cobra`
+* `context`
+* `cpp`
+* `csh`
+* `fortran`
+* `m4`
+* `mma`
+* `plaintex`
+* `ps1`
+* `python`
+* `ruby`
+* `sh`
+* `tcl`
+* `tcsh`
+* `tex`
+* `texmf`
+* `vb`
+* `vim`
+* `vroom`
+* `zsh`
+
+`conjoin` supports string literal merging for the following types:
+
+* `ada`
+* `applescript`
+* `cobol`
+* `cobra`
+* `cs`
+* `erlang`
+* `go`
+* `haskell`
+* `java`
+* `javascript`
+* `julia`
+* `kotlin`
+* `lua`
+* `mma`
+* `pascal`
+* `ps1`
+* `python`
+* `ruby`
+* `rust`
+* `scala`
+* `swift`
+* `typescript`
+* `vb`
+* `vhdl`
 
 You can add support for your own filetypes in your `.vimrc`:
 
@@ -108,6 +158,7 @@ if !exists('g:conjoin_filetypes')
   let g:conjoin_filetypes = {}
 endif
 g:conjoin_filetypes.intercal = {'leading': '^\s*PLEASE', 'trailing': '\\$'}
+g:conjoin_filetypes.lolcode = {'quote': [['\s*MKAY?\s*$', '^\s*SMOOSH']]}
 " Or use a literal-Dict in Vim 8.1.1705+
 " g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
 ```

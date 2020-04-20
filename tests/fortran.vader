@@ -2,6 +2,7 @@
 # Modern Fortran uses ampersand at the end of a line to continue.
 # A leading (optionally space-leading) ampersand on the next line is also
 # allowed.  conjoin does not support column 6 as a continuation indicator.
+# Fortran uses // for string concatenation.
 # Test basic functionality; more coverage in shell.vader.
 
 Given fortran (Line with continuations):
@@ -54,3 +55,15 @@ Expect fortran:
   
         i = label&1 + 2 + 3
   print write (*,*) 'i is ',    i, ' and I am ', ! a comment
+
+
+Given fortran (A multi-line string):
+  print *,s "Hello, " &
+    & // "World"//
+    "!"
+
+Do (Join with count J):
+  3J
+
+Expect fortran:
+  print *,s "Hello, World!"

@@ -1,0 +1,27 @@
+# Vader tests for quote joining with conjoin.
+# Haskell uses ++ to concatenate strings and doesn't use line continuation.
+
+Given haskell (A multiline string):
+  x = "Hello,"
+    ++ " World" ++
+    "!"
+
+Do (Join with J):
+  J
+
+Expect haskell:
+  x = "Hello, World" ++
+    "!"
+
+
+Given haskell (Function call with invalid strings):
+  fun(
+    'Hello,'
+    ++ ' World!'
+    )
+
+Do (Join with count gJ):
+  4gJ
+
+Expect haskell:
+  fun(  'Hello,'  ++ ' World!'  )

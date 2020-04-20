@@ -116,3 +116,126 @@ Expect python:
       print('Something')
     elif     x      or y:
       print('Something else')
+
+
+Given python (A function with single quote literal concatenation):
+  def fun(x, y):
+    if x\
+        and y:
+      print('Something'
+            ' and '
+            'something else')
+
+Do (Join the string with J):
+  2gg5J
+
+Expect python:
+  def fun(x, y):
+    if x and y: print('Something and something else')
+
+
+Given python (A function with double quote literal concatenation):
+  def fun(x, y):
+    if x\
+        and y:
+      print(
+        "Something"
+        " and "
+        "something else")
+
+Do (Join the string with gJ):
+  2gg6gJ
+
+Expect python:
+  def fun(x, y):
+    if x      and y:    print(      "Something and something else")
+
+
+Given python (A function with mixed quote literal concatenation):
+  def fun(x, y):
+    if x\
+        and y:
+      print(
+        "Something"
+        ' and '
+        "something " 'else')
+
+Do (Join the string with J):
+  2gg6J
+
+Expect python:
+  def fun(x, y):
+    if x and y: print( "Something" ' and ' "something " 'else')
+
+
+Given python (A literal string concatenation and following lines):
+  x = ('Hello'
+       ', World!')
+  print('Greeting: '
+        r'%s' % x)
+  y = 'Something'\
+    ' and ' \
+    "something else"
+
+Do (Join the whole file with visual J):
+  VGJ
+
+Expect python:
+  x = ('Hello, World!') print('Greeting: ' r'%s' % x) y = 'Something and ' "something else"
+
+
+Given python (A literal string concatenation list argument):
+  l = [
+    42,
+    'Hello, W'
+    'orld',
+    [x * 2 for
+      x in range(1, 10) \
+    ], 'another'
+    'string'
+  ]
+
+Do (Join the list items with visual J):
+  jwv5jWJ
+
+Expect python:
+  l = [
+    42, 'Hello, World', [x * 2 for x in range(1, 10) ], 'another'
+    'string'
+  ]
+
+
+Given python (A multi-line string):
+  x =\
+    "Lorem"
+    "ipsum"
+    "dolor"
+    "sit"
+    "amet"
+  print(x)
+  print(x.upper())
+
+Execute (Join the string with :Join count):
+  Join 6
+
+Expect python:
+  x = "Loremipsumdolorsitamet"
+  print(x)
+  print(x.upper())
+
+
+Given python (A multi-line string):
+  x =\
+    "Lorem"
+    "ipsum"
+    "dolor"
+    "sit"
+    "amet"
+  print(
+        x.upper())
+
+Do (Join the file with visual gJ):
+  VGgJ
+
+Expect python:
+  x =  "Loremipsumdolorsitamet"print(      x.upper())

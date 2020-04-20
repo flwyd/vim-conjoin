@@ -13,8 +13,8 @@ CONTENTS                                                    *conjoin-contents*
 INTRODUCTION                                                   *conjoin-intro*
 
 conjoin is a plugin that handles line joining in the presence of line
-continuation characters.  Vim's normal behavior for |J| and |:join| on the
-following shell script:
+continuation characters and merges literal strings.  Vim's normal behavior for
+|J| and |:join| on the following shell script:
 >
   cat file.txt \
     | sort \
@@ -30,8 +30,47 @@ With conjoin, running join commands on the same script will produce
 <
 (|gJ| does the same but doesn't adjust leading/trailing space.)
 
+conjoin also merges quoted string literals, which are often spread over
+multiple lines.  For example, in Python:
+>
+  print('Lorem ipsum '
+        'sic dolor amet,'
+        + ' consectetur adipisicing elit')
+<
+would normally be joined as
+>
+  print('Lorem ipsum ' 'sic dolor amet,' + ' consectetur adipisicing elit')
+<
+but conjoin will join it into a single literal string:
+>
+  print('Lorem ipsum sic dolor amet, consectetur adipisicing elit')
+<
+
 Note that vim already removes leading comment characters when joining lines in
-a block comment when |formatoptions| contains the 'j' flag.
+a block comment when |formatoptions| contains the 'j' flag.  conjoin currently
+removes line continuation characters in comments and does not merge strings
+with intervening comment characters.  For example,
+>
+  # Line 1 \
+  # "Line 2" +
+  # "Line 3"
+<
+will join as
+>
+  # Line 1 "Line 2" "Line 3"
+<
+but
+>
+  /* "Line 1" +
+   * "Line 2" +
+     "Line 3"
+   */
+<
+will join as
+>
+  /* "Line 1" + "Line 2Line3" */
+<
+This comment behavior is subject to change.
 
 conjoin works with several programming languages by default, see
 |conjoin-config| for details.
@@ -40,21 +79,24 @@ conjoin works with several programming languages by default, see
 COMMANDS                                                    *conjoin-commands*
 
 :[range]Join[!] [count] [flags]                                        *:Join*
-  Like :[range]join[!] [count] [flags] but removes continuation characters.
-  Before joining lines, trailing line continuation characters are removed from
-  each line in the range before the last and leading line continuation
-  characters are removed from each line after the first.
+  Like :[range]join[!] [count] [flags] but removes continuation characters and
+  merges trailing/leading concatenated string literals.  Before joining lines,
+  trailing line continuation characters are removed from each line in the
+  range before the last and leading line continuation characters are removed
+  from each line after the first.
 
 ==============================================================================
 MAPPINGS                                                    *conjoin-mappings*
 
 *conjoin-J* J  Join [count] lines, as with the builtin |J| command.  Before
 joining lines, trailing and/or leading continuation escape characters will be
-removed from the lines to be joined.
+removed from the lines to be joined and trailing/leading literal strings will
+be merged.
 
 *conjoin-v_J* {Visual}J  Join the highlighted lines, as with the builtin |v_J|
 command. Before joining lines, trailing and/or leading continuation escape
-characters will be removed from the lines to be joined.
+characters will be removed from the lines to be joined and trailing/leading
+literal strings will be merged.
 
 *conjoin-gJ* gJ  Like J but with joining semantics like the builtin |gJ|.
 
@@ -76,14 +118,20 @@ appropriate variable:
 ==============================================================================
 CONFIGURATION                                                 *conjoin-config*
 
-g:conjoin_filetypes configures continuation patterns for many programming
+|g:conjoin_filetypes| configures continuation patterns for many programming
 lanugages.  It is a dict with filetypes (e.g. "sh", "ruby", "vim") as keys and
-conjoin pattern dicts as values.  A conjoin dict has optional "trailing" and
-"leading" keys mapped to regular expression patterns.  When conjoin mappings
-or functions are called, the current buffer's 'filetype' is looked up in
-g:conjoin_filetypes.  If it contains a conjoin dict, the "trailing" pattern
+conjoin pattern dicts as values.  A conjoin dict has optional trailing" and
+"leading" keys mapped to regular expression patterns. A conjoin dict may also
+have a 'quote' entry mapped to a list of 2-element lists of trailing/leading
+patterns for string literal concatenation, e.g.
+>
+  [['"\s*+\s*$', '^\s*"'], ['"\s*$', '^\s*+\s*"']]
+<
+for double-quoted string literals concatenated with a + operator. When conjoin
+mappings or functions are called, the current buffer's 'filetype' is looked up
+in g:conjoin_filetypes.  If it contains a conjoin dict, the "trailing" pattern
 will be matched against each join line (except the last) and the "leading"
-pattern will be matched against each join line (except the first). Make sure
+pattern will be matched against each join line (except the first).  Make sure
 to include $ at the end of trailing patterns and ^ at the beginning of leading
 patterns.  Example use in .vimrc:
 >
@@ -91,37 +139,48 @@ patterns.  Example use in .vimrc:
     let g:conjoin_filetypes = {}
   endif
   g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
+  g:conjoin_filetypes.lolcode = #{quote: [['\s*MKAY?\s*$', '^\s*SMOOSH']]}
 <
 A buffer-local variable b:conjoin_patterns can replace the global filetype
 settings.
 
-The default set of configured filetypes is
+Setting |g:conjoin_merge_strings|=0 or |b:conjoin_merge_strings|=0 will
+disable merging string literals.
+
+The default set of line continuation filetypes is
 >
-  autoit bash c cobra context cpp csh fortran m4 mma plaintex ps1 python
-  ruby sh tcl tcsh tex texmf vb vim zsh
+  applescript autoit bash c cobra context cpp csh fortran m4 mma
+  plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
+<
+and the default set of string-merging filetypes is
+>
+  ada applescript cobol cobra cs erlang go haskell java javascript julia
+  kotlin lua mma pascal ps1 python ruby rust scala swift typescript vb vhdl
 <
 
 ==============================================================================
 FUNCTIONS                                                  *conjoin-functions*
 
 conjoin#joinNormal({cmd})                               *conjoin#joinNormal()*
-  Removes continuation characters and then joins lines as if (count) {cmd}
-  were typed in normal mode.  If cmd is empty (or otherwise neither J nor gJ)
-  then no command will be performed to join the lines, with the expectation
-  that a mapping will initiate its own join operation.  This function is
-  typically called from the from a mapping established in plugin/conjoin.vim.
+  Removes continuation characters, merges string literals, and then joins
+  lines as if (count) {cmd} were typed in normal mode.  If cmd is empty (or
+  otherwise neither J nor gJ) then no command will be performed to join the
+  lines, with the expectation that a mapping will initiate its own join
+  operation.  This function is typically called from the from a mapping
+  established in plugin/conjoin.vim.
 
 conjoin#joinVisual({cmd})                               *conjoin#joinVisual()*
-  Removes continuation characters and then joins lines as if (count) {cmd}
-  were typed in visual mode.  If cmd is empty (or otherwise neither J nor gJ)
-  then no command will be performed to join the lines, with the expectation
-  that a mapping will initiate its own join operation.  This function is
-  typically called from the from a mapping established in plugin/conjoin.vim.
+  Removes continuation characters, merges string literals, and then joins
+  lines as if (count) {cmd} were typed in visual mode.  If cmd is empty (or
+  otherwise neither J nor gJ) then no command will be performed to join the
+  lines, with the expectation that a mapping will initiate its own join
+  operation.  This function is typically called from the from a mapping
+  established in plugin/conjoin.vim.
 
 conjoin#joinEx({line1}, {line2}, {range}, {bang}, {qargs})  *conjoin#joinEx()*
-  Removes continuation characters and then joins lines as if :[range]join[!]
-  were typed in ex mode.  This function is typically called from the :Join
-  command.
+  Removes continuation characters, merges string literals, and then joins
+  lines as if :[range]join[!] were typed in ex mode.  This function is
+  typically called from the :Join command.
 
 
 vim:tw=78:ts=8:ft=help:norl:

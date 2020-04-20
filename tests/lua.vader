@@ -1,0 +1,47 @@
+# Vader tests for quote joining with conjoin.
+# Lua uses .. to concatenate strings and doesn't use line continuation.
+
+Given lua (A multi-line string):
+  x = "foo" ..
+  "bar" ..
+  "baz"
+
+Do (Join first two lines):
+  J
+
+Expect lua:
+  x = "foobar" ..
+  "baz"
+
+
+Given lua (A multi-line function call):
+  print(
+  "Lorem "
+  .. "ipsum "
+    .. "dolor "
+    .. "sit "
+  	.. "amet"
+  )
+
+Do (Join file with visual gJ):
+  VGgJ
+
+Expect lua:
+  print("Lorem ipsum dolor sit amet")
+
+
+Given lua (No string concatenation, invalid syntax):
+  print(
+  "Lorem "
+  "ipsum "
+    + "dolor " \
+    & "sit "
+  	^ "amet"
+    .. ','
+  )
+
+Execute (Join file with Join count):
+  Join 8
+
+Expect lua:
+  print( "Lorem " "ipsum " + "dolor " \ & "sit " ^ "amet" .. ',')

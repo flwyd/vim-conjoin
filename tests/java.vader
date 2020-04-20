@@ -1,0 +1,87 @@
+# Vader tests for quote joining with conjoin.
+# Java merges literal quotes separated by + and lacks line continuation.
+
+Given java (A multi-line constant):
+  class Foo {
+    static String text1 = "Lorem "
+      + "ipsum " +
+      "dolor "
+      +"sit "
+      + "amet, "+
+      "consectetur"
+      + " adipisicing "   +   
+      "elit";
+    static String text2 = text1
+      + ", sed"
+      +" do eiusmod " + "tempor " +
+      "\"incididunt ut labore\""
+      + " et dolore magna aliqua."
+    ;
+  }
+
+Do (Join strings with count J and visual J):
+  j8Jjv5jJ
+
+Expect java:
+  class Foo {
+    static String text1 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit";
+    static String text2 = text1 + ", sed do eiusmod " + "tempor \"incididunt ut labore\" et dolore magna aliqua." ;
+  }
+
+Given java (A method call with a multi-line string):
+  class Foo {
+    static String text1 = String.format(
+      "%s\t"
+      + "%d",
+      "max",
+      + Integer.MAX_VALUE)
+    ;
+  }
+
+Do (Join strings with count gJ):
+  2gg6gJ
+
+Expect java:
+  class Foo {
+    static String text1 = String.format(    "%s\t%d",    "max",    + Integer.MAX_VALUE)  ;
+  }
+
+
+Given java (Javadoc and a method):
+  class Foo {
+    /**
+     * Returns "a " +
+     * "String that's"
+     * +" been "
+     * + "concatenated".
+     */
+    String method() {
+      return "Lorem " +
+  "ipsum"
+  +" dolor " +
+    + "sit amet,"
+    + getClass()
+    +   " consectetur"
+      + " adipisicing elit,";
+    }
+    // Comment with "quote"
+    // + "d strings"
+    /* Block "comment" +
+       "without leading *"
+       + " and quotes" + */
+  }
+
+Execute (Join comments and quotes with :Join and formatoptions=j):
+  setlocal formatoptions+=j
+  2,7Join | 4Join! 7 | +2Join | $-3Join 3
+
+Expect java:
+# Comment trimming with formatoptions=j happens after quote merging
+  class Foo {
+    /** Returns "a " + "String that's" +" been " + "concatenated".  */
+    String method() {
+      return "Lorem ipsum dolor " +  + "sit amet,"  + getClass()  +   " consectetur adipisicing elit,";
+    }
+    // Comment with "quote" + "d strings"
+    /* Block "commentwithout leading * and quotes" + */
+  }

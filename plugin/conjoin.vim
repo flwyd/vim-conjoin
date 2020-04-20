@@ -15,15 +15,16 @@
 " File: conjoin.vim
 " Author: Trevor Stone
 " Description: Plugin which maps J and gJ to remove line continuation
-" characters when joining lines.  Works with J/gJ alone, with a count, or in
-" visual mode.  Also provides a :[range]Join[!] command.
+" characters when joining lines and merge literal strings.  Works with J/gJ
+" alone, with a count, or in visual mode.  Also provides a :[range]Join[!]
+" command.
 
 ""
 " @section Introduction, intro
 " @order intro commands mappings config functions
 " conjoin is a plugin that handles line joining in the presence of line
-" continuation characters.  Vim's normal behavior for |J| and |:join| on the
-" following shell script: >
+" continuation characters and merges literal strings.  Vim's normal behavior
+" for |J| and |:join| on the following shell script: >
 "   cat file.txt \
 "     | sort \
 "     | uniq -c
@@ -36,8 +37,35 @@
 " <
 " (|gJ| does the same but doesn't adjust leading/trailing space.)
 "
+" conjoin also merges quoted string literals, which are often spread over
+" multiple lines.  For example, in Python: >
+"   print('Lorem ipsum '
+"         'sic dolor amet,'
+"         + ' consectetur adipisicing elit')
+" < would normally be joined as >
+"   print('Lorem ipsum ' 'sic dolor amet,' + ' consectetur adipisicing elit')
+" < but conjoin will join it into a single literal string: >
+"   print('Lorem ipsum sic dolor amet, consectetur adipisicing elit')
+" <
+"
 " Note that vim already removes leading comment characters when joining lines
-" in a block comment when |formatoptions| contains the 'j' flag.
+" in a block comment when |formatoptions| contains the 'j' flag.  conjoin
+" currently removes line continuation characters in comments and does not
+" merge strings with intervening comment characters.  For example, >
+"   # Line 1 \
+"   # "Line 2" +
+"   # "Line 3"
+" < will join as >
+"   # Line 1 "Line 2" "Line 3"
+" < but >
+"   /* "Line 1" +
+"    * "Line 2" +
+"      "Line 3"
+"    */
+" < will join as >
+"   /* "Line 1" + "Line 2Line3" */
+" <
+" This comment behavior is subject to change.
 "
 " conjoin works with several programming languages by default, see
 " @section(config) for details.
@@ -47,12 +75,14 @@
 " *conjoin-J*
 " J  Join [count] lines, as with the builtin |J| command.  Before joining
 " lines, trailing and/or leading continuation escape characters will be
-" removed from the lines to be joined.
+" removed from the lines to be joined and trailing/leading literal strings
+" will be merged.
 "
 " *conjoin-v_J*
 " {Visual}J  Join the highlighted lines, as with the builtin |v_J| command.
 " Before joining lines, trailing and/or leading continuation escape characters
-" will be removed from the lines to be joined.
+" will be removed from the lines to be joined and trailing/leading literal
+" strings will be merged.
 "
 " *conjoin-gJ*
 " gJ  Like J but with joining semantics like the builtin |gJ|.
@@ -78,32 +108,76 @@ let did_conjoin = 1
 
 ""
 " @section Configuration, config
-" g:conjoin_filetypes configures continuation patterns for many programming
-" lanugages.  It is a dict with filetypes (e.g. "sh", "ruby", "vim") as keys
-" and conjoin pattern dicts as values.  A conjoin dict has optional "trailing"
-" and "leading" keys mapped to regular expression patterns.  When conjoin
-" mappings or functions are called, the current buffer's 'filetype' is looked
-" up in g:conjoin_filetypes.  If it contains a conjoin dict, the "trailing"
-" pattern will be matched against each join line (except the last) and the
-" "leading" pattern will be matched against each join line (except the first).
-" Make sure to include $ at the end of trailing patterns and ^ at the
-" beginning of leading patterns.  Example use in .vimrc: >
+" @setting(g:conjoin_filetypes) configures continuation patterns for many
+" programming lanugages.  It is a dict with filetypes (e.g. "sh", "ruby",
+" "vim") as keys and conjoin pattern dicts as values.  A conjoin dict has
+" optional trailing" and "leading" keys mapped to regular expression patterns.
+" A conjoin dict may also have a 'quote' entry mapped to a list of 2-element
+" lists of trailing/leading patterns for string literal concatenation, e.g. >
+"   [['"\s*+\s*$', '^\s*"'], ['"\s*$', '^\s*+\s*"']]
+" < for double-quoted string literals concatenated with a + operator.
+" When conjoin mappings or functions are called, the current buffer's
+" 'filetype' is looked up in g:conjoin_filetypes.  If it contains a conjoin
+" dict, the "trailing" pattern will be matched against each join line (except
+" the last) and the "leading" pattern will be matched against each join line
+" (except the first).  Make sure to include $ at the end of trailing patterns
+" and ^ at the beginning of leading patterns.  Example use in .vimrc: >
 "   if !exists('g:conjoin_filetypes')
 "     let g:conjoin_filetypes = {}
 "   endif
 "   g:conjoin_filetypes.intercal = #{leading: '^\s*PLEASE', trailing: '\\$'}
+"   g:conjoin_filetypes.lolcode = #{quote: [['\s*MKAY?\s*$', '^\s*SMOOSH']]}
 " <
 " A buffer-local variable b:conjoin_patterns can replace the global filetype
 " settings.
 "
-" The default set of configured filetypes is >
-"   autoit bash c cobra context cpp csh fortran m4 mma plaintex ps1 python
-"   ruby sh tcl tcsh tex texmf vb vim zsh
+" Setting @setting(g:conjoin_merge_strings)=0 or
+" @setting(b:conjoin_merge_strings)=0 will disable merging string literals.
+"
+" The default set of line continuation filetypes is >
+"   applescript autoit bash c cobra context cpp csh fortran m4 mma
+"   plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
+" < and the default set of string-merging filetypes is >
+"   ada applescript cobol cobra cs erlang go haskell java javascript julia
+"   kotlin lua mma pascal ps1 python ruby rust scala swift typescript vb vhdl
 " <
 
 if !exists('g:conjoin_filetypes')
+	" @setting g:conjoin_filetypes
 	let g:conjoin_filetypes = {}
 endif
+
+if !exists('g:conjoin_merge_strings')
+	" @setting g:conjoin_merge_strings
+	let g:conjoin_merge_strings = 1
+endif
+
+" Common tring literal patterns: lists of [trailing, leading] pairs.
+" Two sequential "strings" as in C/C++/D/Python/Ruby
+let s:double_quote_sequential = [['"\s*$', '^\s*"']]
+" Two sequential 'strings' as in Python/Ruby
+let s:single_quote_sequential = [["'\\s*$", "^\\s*'"]]
+" Two "strings" with a + concatenation operator as in C#/Go/Java/JS/Rust/...
+let s:double_quote_plus = [['"\s*+\s*$', '^\s*"'], ['"\s*$', '^\s*+\s*"']]
+" Two 'strings' with a + concatenation operator as in JS/Pascal/PowerShell/...
+let s:single_quote_plus = [["'\\s*+\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*+\\s*'"]]
+" Two `strings` with a + concatenation operator as in JavaScript/TypeScript
+let s:backtick_plus = [['`\s*+\s*$', '^\s*`'], ['`\s*$', '^\s*+\s*`']]
+" Two "strings" with a ++ concatenation operator as in Erlang/Haskell
+let s:double_quote_double_plus = [['"\s*++\s*$', '^\s*"'], ['"\s*$', '^\s*++\s*"']]
+" Two "strings" with a . concatenation operator as in Perl/PHP/Vim
+let s:double_quote_dot = [['"\s*\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\s*"']]
+" Two 'strings' with a . concatenation operator as in Perl/PHP/Vim
+let s:single_quote_dot = [["'\\s*\.\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\.\\s*'"]]
+" Two "strings" with a ~ concatenation operator as in D/Raku
+let s:double_quote_tilde = [['"\s*\~\s*$', '^\s*"'], ['"\s*$', '^\s*\~\s*"']]
+" Two 'strings' with a ~ concatenation operator as in Raku
+let s:single_quote_tilde = [["'\\s*\~\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\~\\s*'"]]
+" Two "strings" with a & concatenation operator as in Ada/AppleScript/COBOL/VB
+let s:double_quote_ampersand = [['"\s*&\s*$', '^\s*"'], ['"\s*$', '^\s*&\s*"']]
+" TODO Don't merge multiline literals (e.g. three quotes) with normal strings
+" TODO "foo" + r"bar" isn't merged, but r"foo" + "bar" merges to r"foobar"
+" but raw strings and other special syntax shouldn't be merged.
 
 " Default continuation character information taken primarily from
 " https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(syntax)#Line_continuation
@@ -117,6 +191,8 @@ endif
 "   ps1
 " Visual Basic etc. use a trailing underscore preceeded by whitespace ( _):
 "   autoit cobra vb
+" AppleScript uses Option-L/Unicode 00AC NOT SIGN (¬)
+"   applescript
 " Vim uses a leading backslash and optional space, :help line-continuation
 "   vim
 " Vroom vim testing framework uses a leading pipe preceeded by space:
@@ -135,24 +211,56 @@ let s:default_filetypes = {
 			\ 'csh': {'trailing': '\\$'},
 			\ 'tcsh': {'trailing': '\\$'},
 			\ 'zsh': {'trailing': '\\$'},
-			\ 'c': {'trailing': '\\$'},
-			\ 'cpp': {'trailing': '\\$'},
-			\ 'python': {'trailing': '\\$'},
-			\ 'ruby': {'trailing': '\\$'},
+			\ 'c': {'trailing': '\\$',
+				\ 'quote': s:double_quote_sequential},
+			\ 'cpp': {'trailing': '\\$',
+				\ 'quote': s:double_quote_sequential},
+			\ 'python': {'trailing': '\\$',
+				\ 'quote': s:double_quote_plus + s:single_quote_plus
+					\ + s:double_quote_sequential + s:single_quote_sequential},
+			\ 'ruby': {'trailing': '\\$',
+				\ 'quote': s:double_quote_plus + s:single_quote_plus
+					\ + s:double_quote_sequential + s:single_quote_sequential},
 			\ 'tcl': {'trailing': '\\$'},
 			\ 'texmf': {'trailing': '\\$'},
-			\ 'mma': {'trailing': '[\uF3B1\\]$'},
-			\ 'ps1': {'trailing': '\s`$'},
+			\ 'mma': {'trailing': '[\uF3B1\\]$',
+				\ 'quote': [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '\s*<>"']]},
+			\ 'ps1': {'trailing': '\s`$',
+				\ 'quote': s:double_quote_plus + s:single_quote_plus},
 			\ 'autoit': {'trailing': '\s_$'},
-			\ 'cobra': {'trailing': '\s_$'},
-			\ 'vb': {'trailing': '\s_$'},
+			\ 'cobra': {'trailing': '\s_$',
+				\ 'quote': s:double_quote_plus + s:single_quote_plus},
+			\ 'vb': {'trailing': '\s_$',
+				\ 'quote': s:double_quote_ampersand},
+			\ 'applescript': {'trailing': '[\u00AC]$',
+				\ 'quote': s:double_quote_ampersand},
 			\ 'vim': {'leading': '^\s*\\'},
 			\ 'vroom': {'leading': '\v^\s*\|'},
-			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&'},
+			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&',
+				\ 'quote': [['"\s*//\s*$', '^\s*"'], ['"\s*$', '^\s*//\s*"']]},
 			\ 'tex': {'trailing': '%$'},
 			\ 'context': {'trailing': '%$'},
 			\ 'plaintex': {'trailing': '%$'},
 			\ 'm4': {'trailing': '\<dnl$'},
+			\ 'pascal': {'quote': s:single_quote_plus},
+			\ 'cs': {'quote': s:double_quote_plus},
+			\ 'go': {'quote': s:double_quote_plus},
+			\ 'java': {'quote': s:double_quote_plus},
+			\ 'kotlin': {'quote': s:double_quote_plus},
+			\ 'rust': {'quote': s:double_quote_plus},
+			\ 'scala': {'quote': s:double_quote_plus},
+			\ 'swift': {'quote': s:double_quote_plus},
+			\ 'javascript': {'quote': s:double_quote_plus
+				\ + s:single_quote_plus + s:backtick_plus},
+			\ 'typescript': {'quote': s:double_quote_plus
+				\ + s:single_quote_plus + s:backtick_plus},
+			\ 'erlang': {'quote': s:double_quote_double_plus},
+			\ 'haskell': {'quote': s:double_quote_double_plus},
+			\ 'ada': {'quote': s:double_quote_ampersand},
+			\ 'cobol': {'quote': s:double_quote_ampersand},
+			\ 'vhdl': {'quote': s:double_quote_ampersand},
+			\ 'lua': {'quote': [['"\s*\.\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\.\s*"']]},
+			\ 'julia': {'quote': [['"\s*\*\s*$', '^\s*"'], ['"\s*$', '^\s*\*\s*"']]},
 			\}
 
 " Populate g:conjoin_filetypes with defaults, respecting user overrides.
@@ -195,9 +303,10 @@ call s:mapping('v', g:conjoin_map_J, 'J')
 call s:mapping('v', g:conjoin_map_gJ, 'gJ')
 
 ""
-" Like :[range]join[!] [count] [flags] but removes continuation characters.
-" Before joining lines, trailing line continuation characters are removed from
-" each line in the range before the last and leading line continuation
-" characters are removed from each line after the first.
+" Like :[range]join[!] [count] [flags] but removes continuation characters
+" and merges trailing/leading concatenated string literals.  Before joining
+" lines, trailing line continuation characters are removed from each line in
+" the range before the last and leading line continuation characters are
+" removed from each line after the first.
 command! -bang -bar -range -nargs=* Join
 	\ :call conjoin#joinEx(<line1>, <line2>, <range>, <q-bang>, <q-args>)

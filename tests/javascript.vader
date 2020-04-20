@@ -1,0 +1,55 @@
+# Vader tests for quote joining with conjoin.
+# JavaScript merges literal quotes separated by + and lacks line continuation
+# (except inside strings, which conjoin doesn't handle).
+# Conjoin doesn't merge strings that use different quote marks.
+
+Given javascript (A multi-line constant):
+  const x =
+  'Lorem' +
+  'ipsum'
+  +"dolor"
+  + "sit" + 
+  "amet,"+
+  `consectetur` +
+  `adipisicing`
+   + `elit,`;
+
+Do (Join the file with visual J):
+  VGJ
+
+Expect javascript:
+  const x = 'Loremipsum' +"dolorsitamet,"+ `consecteturadipisicingelit,`;
+
+
+Given javascript (A function with strings):
+  function foo() {
+    'does'
+    'nothing';
+    `"foo" + "bar"` +
+    "baz"['len' + 'gth']
+    + ' characters'
+    + 'long' +
+    // 'comment' +
+    'word';
+  }
+
+Do (Join body with gJ):
+  j8gJ
+
+Expect javascript:
+  function foo() {
+    'does'  'nothing';  `"foo" + "bar"` +  "baz"['len' + 'gth']  + ' characterslong' +  // 'commentword';
+  }
+
+
+Given javascript (A multiline string):
+  let x = 'Lorem \
+    ipsum "dolor" +\
+    "amet"'
+
+Execute (Join file with :Join! count):
+  Join! 3
+
+Expect javascript:
+# If intra-string JS continuation characters are supported, this will change
+  let x = 'Lorem \  ipsum "dolor" +\  "amet"'

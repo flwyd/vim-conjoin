@@ -1,0 +1,37 @@
+# Vader tests for quote joining with conjoin.
+# Julia uses * to concatenate strings and doesn't use line continuation.
+
+Given julia (A two-line string):
+  x = "Hello" *
+    "World"
+  println(x)
+
+Execute (Join with :Join):
+  Join
+
+Expect julia:
+  x = "HelloWorld"
+  println(x)
+
+
+Given julia (Function call with a multiline string):
+  println(x *
+  y
+  * "Lorem "
+  *"ipsum"*
+    "dolor"			*
+  "sic"    *
+  "amet,"
+  * "consectetur "
+    *  "adipisicing " * "elit"
+  * 'a'
+  * 'b' *
+  "foo"
+  ** "bar"
+  )
+
+Do (Join the file with visual J):
+  VGJ
+
+Expect julia:
+  println(x * y * "Lorem ipsumdolorsicamet,consectetur adipisicing " * "elit" * 'a' * 'b' * "foo" ** "bar")

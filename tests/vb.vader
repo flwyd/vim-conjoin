@@ -1,5 +1,6 @@
 # Vader tests for line continuation joining with conjoin.
-# Visual Basic uses (space-prefixed) underscore line continuation.
+# Visual Basic uses (space-prefixed) underscore line continuation
+# and & for string concatenation.
 # Test basic functionality; more coverage in shell.vader.
 
 Given vb (A Visual Basic function with continuation):
@@ -44,6 +45,7 @@ Expect vb:
     i = 1    + xj = i +  y_k = y_  + _z  Console.WriteLine(i + j + k)
   End Sub
 
+
 Given vb (A long comment with underscores at the end):
   ' conjoin doesn't treat _
   ' comment _blocks_ specially
@@ -58,3 +60,36 @@ Execute (Join the whole file with :Join):
 
 Expect vb:
   ' conjoin doesn't treat ' comment _blocks_ specially ' this is perhaps a bug_ ' and maybe it should not strip ' continuation characters in ' comments.  This line has a trailing space _ ' This line does not._
+
+
+Given vb (A function call with concatenated string):
+  Console.WriteLine( _
+    "Lorem " _
+    & "ipsum " & _
+    "dolor"
+    & " sit " & _
+    & "amet")
+
+Do (Join the whole file with visual J):
+  vGJ
+
+Expect vb:
+  Console.WriteLine( "Lorem ipsum dolor sit " & & "amet")
+
+
+Given vb (A function call with concatenated string):
+  Console.WriteLine("foo" & _
+    "bar " & _
+    baz _
+    & "FOO"    _
+    + "BAR"  &  _
+    "BAZ" & _
+  )
+  ' EOF
+
+Do (Join the call with count gJ):
+  7gJ
+
+Expect vb:
+  Console.WriteLine("foobar " &  baz  & "FOO"     + "BARBAZ" &)
+  ' EOF

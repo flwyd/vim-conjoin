@@ -40,7 +40,7 @@ Do (Join the expression with visual J):
 
 Expect ruby:
   def fun(x, y)
-    puts 'something' 'else' if x and y -x
+    puts 'somethingelse' if x and y -x
   end
 
 
@@ -50,7 +50,7 @@ Given ruby (A function with a line break):
   'else' \
     if x\
       and y
-    -x
+  -x
   end
 
 Do (Join the expression with visual gJ):
@@ -58,7 +58,7 @@ Do (Join the expression with visual gJ):
 
 Expect ruby:
   def fun(x, y)
-    puts 'something''else'   if x    and y  -x
+    puts 'somethingelse'   if x    and y-x
   end
 
 
@@ -76,14 +76,14 @@ Execute (Join the expression with range :Join):
 
 Expect ruby:
   def fun(x, y)
-    puts 'something' 'else' if x and y -x
+    puts 'somethingelse' if x and y -x
   end
 
 
 Given ruby (A function with a line break):
   def fun(x, y)
     puts 'some\nthing'\
-  'else' \
+  "else" \
     if x\
       and y
     -x
@@ -93,7 +93,7 @@ Execute (Join the whole file with :Join count):
   Join 10
 
 Expect ruby:
-  def fun(x, y) puts 'some\nthing' 'else' if x and y -x end
+  def fun(x, y) puts 'some\nthing' "else" if x and y -x end
 
 
 Given ruby (A function with a line break):
@@ -109,7 +109,7 @@ Execute (Join the whole file with range :Join!):
   1,$Join!
 
 Expect ruby:
-  def fun(x, y)  puts 'something''else'   if x    and y  -xend
+  def fun(x, y)  puts 'somethingelse'   if x    and y  -xend
 
 
 Given ruby (A function with a line break):
@@ -136,8 +136,8 @@ Expect ruby:
 
 Given ruby (A function with a line break):
   def fun(x, y)
-    puts 'something'\
-  'else' \
+    puts "something"\
+  "else" \
     if x\
       and y
     -x
@@ -148,6 +148,6 @@ Execute (Join the puts expression with line :Join! count):
 
 Expect ruby:
   def fun(x, y)
-    puts 'something''else'   if x    and y
+    puts "somethingelse"   if x    and y
     -x
   end

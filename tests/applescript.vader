@@ -1,0 +1,40 @@
+# Vader tests for line continuation joining with conjoin.
+# AppleScript uses character 172 Unicode NOT SIGN (¬) line continuation
+# and ampersand for string concatenation.
+# Test basic functionality; more coverage in python.vader.
+
+Given applescript (A script with line continuations):
+  try
+    set greeting¬
+    to "Hello," & " World"
+    display ¬
+      dialog ¬
+      greeting
+  end try
+
+Do (Join body with gJ):
+  jgJj3gJ
+
+Expect applescript:
+  try
+    set greeting  to "Hello," & " World"
+    display     dialog     greeting
+  end try
+
+
+Given applescript (A script with line continuations):
+  say (
+    "Lorem " &
+    "ipsum "
+    &"dolor"&
+    " sit "
+    & "amet, "
+  ) & "consectetur "¬
+  & "adipisicing " ¬
+  "elit,"
+
+Execute (Join file with :Join):
+  1,$Join
+
+Expect applescript:
+  say ( "Lorem ipsum dolor sit amet, ") & "consectetur adipisicing " "elit,"
