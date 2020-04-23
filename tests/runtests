@@ -46,7 +46,7 @@ else
 		fi
 	done
 	if [ -z "$vaderpath" ]; then
-		echo "Could not find plugin directory with vader.vim, set $VADER_PLUGIN"
+		echo "Could not find plugin directory with vader.vim, set \$VADER_PLUGIN"
 		exit 1
 	fi
 fi

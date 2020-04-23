@@ -154,6 +154,7 @@ function! s:substituteRange(linefirst, linelast, trailpat, leadpat) abort
 	endfor
 endfunction
 
+
 ""
 " For each pair of patterns in {quotepairs}, checks each adjacent pair of
 " lines between {linefirst} and {linelast}.  If the first quote pattern
@@ -182,7 +183,7 @@ function! s:mergeQuotes(linefirst, linelast, quotepairs) abort
 				let l:line = substitute(l:first, l:trailpat, '', '')
 							\ . substitute(l:second, l:leadpat, '', '')
 				call setline(l:i, l:line)
-				call deletebufline('', l:i + 1)
+				call s:deleteLine(l:i + 1)
 				let l:fewerlines += 1
 				break
 			endif
@@ -190,6 +191,23 @@ function! s:mergeQuotes(linefirst, linelast, quotepairs) abort
 	endfor
 	return l:fewerlines
 endfunction
+
+
+""
+" Deletes a line with deletebufline in Vim 8.1.0039+ or :delete prior.
+" @private
+if exists('*deletebufline')
+	function! s:deleteLine(lineno) abort
+		call deletebufline('', a:lineno)
+	endfunction
+else
+	function! s:deleteLine(lineno) abort
+		" TODO Tests that join the whole file fail due to a trailing space
+		let l:pos = getcurpos('.')
+		keepjumps execute a:lineno . 'delete'
+		call setpos('.', l:pos)
+	endfunction
+endif
 
 
 ""
