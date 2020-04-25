@@ -203,7 +203,7 @@ if exists('*deletebufline')
 else
 	function! s:deleteLine(lineno) abort
 		" TODO Tests that join the whole file fail due to a trailing space
-		let l:pos = getcurpos('.')
+		let l:pos = getcurpos()
 		keepjumps execute a:lineno . 'delete'
 		call setpos('.', l:pos)
 	endfunction
