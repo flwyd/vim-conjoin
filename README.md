@@ -75,11 +75,11 @@ git clone https://github.com/flwyd/vim-conjoin
 
 ## Mappings
 
-By default `conjoin` will create mappings for `J` and `gJ` and create a `:Join`
-command.  If those keys are already mapped, e.g. by
+By default `conjoin` will create normal and visual mode mappings for `J` and
+`gJ` and create a `:Join` command.  If those keys are already mapped, e.g. by
 [splitjoin](https://github.com/AndrewRadev/splitjoin.vim), then `conjoin` will
 call the prior mapping after removing continuation characters.  To get this
-behavior, ensure the plugging defining the other mapping is _before_ `conjoin`
+behavior, ensure the plugin defining the other mapping is _before_ `conjoin`
 in `runtimepath`, e.g.
 
 ```vim

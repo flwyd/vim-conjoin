@@ -267,10 +267,10 @@ let s:default_filetypes = {
 call extend(g:conjoin_filetypes, s:default_filetypes, 'keep')
 
 " Define a normal/visual mode mapping, respecting existing mapping.
-" {mode} is 'n' or 'v', {mapping} is the key(s) to map, {default} is either
+" {mode} is 'n' or 'x', {mapping} is the key(s) to map, {default} is either
 " 'J' or 'gJ' to indicicate command behavior.
 function! s:mapping(mode, mapping, default) abort
-	let l:fname = {'n': 'joinNormal', 'v': 'joinVisual'}[a:mode]
+	let l:fname = {'n': 'joinNormal', 'x': 'joinVisual'}[a:mode]
 	" See if mapping is already defined.  Returns empty string for native vim.
 	let l:prevmap = maparg(a:mapping, a:mode)
 	" If replacing an existing J/gJ mapping, call function with empty string
@@ -298,9 +298,9 @@ call s:mapping('n', g:conjoin_map_J, 'J')
 " nnoremap <silent> gJ :<C-U>call conjoin#joinNormal('gJ')<CR>
 call s:mapping('n', g:conjoin_map_gJ, 'gJ')
 " vnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
-call s:mapping('v', g:conjoin_map_J, 'J')
+call s:mapping('x', g:conjoin_map_J, 'J')
 " vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
-call s:mapping('v', g:conjoin_map_gJ, 'gJ')
+call s:mapping('x', g:conjoin_map_gJ, 'gJ')
 
 ""
 " Like :[range]join[!] [count] [flags] but removes continuation characters
