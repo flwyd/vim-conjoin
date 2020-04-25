@@ -297,9 +297,9 @@ endif
 call s:mapping('n', g:conjoin_map_J, 'J')
 " nnoremap <silent> gJ :<C-U>call conjoin#joinNormal('gJ')<CR>
 call s:mapping('n', g:conjoin_map_gJ, 'gJ')
-" vnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
+" xnoremap <silent> J :<C-U>call conjoin#joinVisual('J')<CR>
 call s:mapping('x', g:conjoin_map_J, 'J')
-" vnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
+" xnoremap <silent> gJ :<C-U>call conjoin#joinVisual('gJ')<CR>
 call s:mapping('x', g:conjoin_map_gJ, 'gJ')
 
 ""
