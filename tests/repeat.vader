@@ -1,0 +1,147 @@
+# Vader tests for repeat and undo use cases for conjoin.
+# These tests assume github.com/tpope/vim-repeat is installed and most will
+# fail otherwise.
+# FIXME Undo test cases don't work, see
+# https://github.com/junegunn/vader.vim/issues/210
+
+Given python (A python function with a line break):
+  def fun(x, y):
+    if x\
+        and y:
+      print('Something')
+    elif x:
+      print('x is %s' % x)
+      print('y is false')
+    else:
+      print('x is false')
+
+Do (Join three lines twice with J):
+  2gg3Jj.
+
+Expect python:
+  def fun(x, y):
+    if x and y: print('Something')
+    elif x: print('x is %s' % x) print('y is false')
+    else:
+      print('x is false')
+
+
+Given java (Java multiline strings):
+  class Foo {
+    static String LOREM = "Lorem ipsum dolor sit amet, "
+      + "consectetur adipisicing elit, "
+      + "sed do eiusmod tempor incididunt "
+      + "ut labore et dolore magna aliqua.";
+    static string VENIAM = "Ut enim ad minim veniam, " +
+      "quis nostrud exercitation ullamco laboris nisi " +
+      "ut aliquip ex ea commodo consequat. " +
+      "Duis aute irure dolor in reprehenderit " +
+      "in voluptate velit esse cillum dolore " +
+      "eu fugiat nulla pariatur.";
+    String fun() {
+      return LOREM + ' ' + VENIAM';
+    }
+  }
+
+Do (Join 4 lines thrice with gJ):
+  j4gJj.j.
+
+Expect java:
+  class Foo {
+    static String LOREM = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    static string VENIAM = "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit " +
+      "in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";  String fun() {    return LOREM + ' ' + VENIAM';
+    }
+  }
+
+
+Given sh (A multiline shell command):
+  echo\
+    lorem\
+    ipsum\
+    dolor\
+    sit\
+    amet
+  cat consectetur
+  echo adipisicing
+  ls elit
+
+Do (Repeated single-line visual J):
+  lvllJj..Gk.
+
+Expect sh:
+  echo lorem\
+    ipsum dolor sit\
+    amet
+  cat consectetur
+  echo adipisicing ls elit
+
+
+Given text (No continuation/quote support):
+  Lorem ipsum dolor sit amet,
+  consectetur adipisicing elit,
+  sed do eiusmod tempor incididunt
+  ut labore et dolore magna aliqua.
+  Ut enim ad minim veniam,
+  quis nostrud exercitation ullamco
+  laboris nisi ut aliquip ex ea commodo consequat.
+  Duis aute irure dolor in reprehenderit
+  in voluptate velit esse cillum dolore
+  eu fugiat nulla pariatur.
+  Excepteur sint occaecat cupidatat non proident,
+  sunt in culpa qui officia deserunt
+  mollit anim id est laborum.
+
+Do (Join first five lines with visual gJ, then repeat two lines above bottom):
+  \<C-V>4jgJG2k.
+
+Expect text:
+  Lorem ipsum dolor sit amet,consectetur adipisicing elit,sed do eiusmod tempor incididuntut labore et dolore magna aliqua.Ut enim ad minim veniam,
+  quis nostrud exercitation ullamco
+  laboris nisi ut aliquip ex ea commodo consequat.
+  Duis aute irure dolor in reprehenderit
+  in voluptate velit esse cillum dolore
+  eu fugiat nulla pariatur.
+  Excepteur sint occaecat cupidatat non proident,sunt in culpa qui officia deseruntmollit anim id est laborum.
+
+
+Given c (C with multi-line macros and strings):
+  char* kBAR = "foo"
+    "bar"
+    "baz";
+  #define FOO \
+  foo()
+
+Do (FIXME Join twice, then undo once):
+  3Jj2Ju
+
+Expect c:
+  char* kBAR = "foobarbaz";
+  #define FOO \
+  foo()
+
+
+Given ruby (Ruby array with multi-line strings):
+  arr = [
+    "Lorem "
+    "ipsum ",
+    'dolor '
+    + 'sit ',
+    "amet, " +
+    "consectetur ",
+    'adipisicing '
+    'elit,'
+  ]
+
+Do (FIXME Join each string with gJ, then undo twice):
+  j2gJj.j.j.uu
+
+Expect ruby:
+  arr = [
+    "Lorem ipsum ",
+    'dolor sit ',
+    "amet, " +
+    "consectetur ",
+    'adipisicing '
+    'elit,'
+  ]

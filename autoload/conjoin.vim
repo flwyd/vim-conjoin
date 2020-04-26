@@ -27,6 +27,8 @@
 " established in plugin/conjoin.vim.
 " @public
 function! conjoin#joinNormal(cmd) abort
+	" Save v:count1 for repeat
+	let l:count = v:count1
 	let l:patterns = s:getDict()
 	let l:start = line('.')
 	let l:end = line('.') + max([v:count1 - 1, 1])
@@ -37,7 +39,10 @@ function! conjoin#joinNormal(cmd) abort
 	let l:removed = s:mergeQuotes(l:start, l:end, get(l:patterns, 'quote', []))
 	" If cmd is J/gJ, execute that command; otherwise caller will do it.
 	if l:end - l:start - l:removed > 0 && (a:cmd ==# 'J' || a:cmd ==# 'gJ')
-		execute 'normal! ' . (v:count1 - l:removed) . a:cmd
+		execute 'normal! ' . (l:count - l:removed) . a:cmd
+	endif
+	if !empty(a:cmd)
+		silent! call repeat#set(a:cmd, l:count)
 	endif
 endfunction
 
@@ -71,6 +76,9 @@ function! conjoin#joinVisual(cmd) abort
 		if a:cmd ==# 'J' || a:cmd ==# 'gJ'
 			execute 'normal! ' . a:cmd
 		endif
+	endif
+	if !empty(a:cmd)
+		silent! call repeat#set(a:cmd, l:end - l:start + 1)
 	endif
 endfunction
 

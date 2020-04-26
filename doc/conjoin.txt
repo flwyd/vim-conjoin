@@ -46,6 +46,11 @@ but conjoin will join it into a single literal string:
   print('Lorem ipsum sic dolor amet, consectetur adipisicing elit')
 <
 
+If the plugin https://github.com/tpope/vim-repeat is installed, |conjoin-J|,
+|conjoin-gJ|, |conjoin-v_J|, and |conjoin-v_gJ| can be repeated with |.| .
+Repeating a command will join the same number of lines as the original command
+count or visual line count.  Like |:join|, |:Join| is not repeatable.
+
 Note that vim already removes leading comment characters when joining lines in
 a block comment when |formatoptions| contains the 'j' flag.  conjoin currently
 removes line continuation characters in comments and does not merge strings

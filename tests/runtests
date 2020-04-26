@@ -21,6 +21,25 @@
 # VADER - vim command to run tests, defaults to "Vader!"
 #         use "Vader" to stay in vim after running tests
 
+die() {
+	echo "ERROR: $1"
+	exit 1
+}
+
+# Paths to plugins that will be in test .vimrc
+typeset -a pluginpaths
+findplugin() {
+	local found=1
+	for p in ~/.vim/plugged ~/.vim/bundle ~/.vim/vim-addons ; do
+		if [ -d "${p}/${1}" ]; then
+			pluginpaths+="${p}/${1}"
+			found=0
+			break
+		fi
+	done
+	return $found
+}
+
 # Set up environment
 # Tests to run
 if [ $# -eq 0 ]; then
@@ -28,6 +47,7 @@ if [ $# -eq 0 ]; then
 else
 	testglobs="$@"
 fi
+
 # Set thisplugin to the directory where tests are being run
 # remove tests/scriptname from absolute path
 thisplugin="${0:P:h:h}"
@@ -38,23 +58,20 @@ vader="${VADER-Vader!}"
 # Path to vim plugin directory, $VADER_PLUGIN if set
 if [ -n "$VADER_PLUGIN" ]; then
 	vaderpath="${VADER_PLUGIN}/vader.vim"
+	pluginpaths+="${VADER_PLUGIN}/vader.vim"
 else
-	for p in ~/.vim/plugged ~/.vim/bundle ~/.vim/vim-addons ; do
-		if [ -d "$p/vader.vim" ]; then
-			vaderpath="${p}/vader.vim"
-			break
-		fi
-	done
-	if [ -z "$vaderpath" ]; then
-		echo "Could not find plugin directory with vader.vim, set \$VADER_PLUGIN"
-		exit 1
-	fi
+	findplugin vader.vim || \
+		die 'Could not find plugin directory for vader.vim, set $VADER_PLUGIN'
 fi
+findplugin vim-repeat || echo 'Testing without vim-repeat'
+findplugin foo
+pluginpaths+="${thisplugin}"
 
 # Minimal vimrc for testing
+# "set runtimepath+=x" for each plugin
+runtimepath=${(F)pluginpaths/#/set runtimepath+=}
 vimrc="filetype off
-set runtimepath+=${vaderpath}
-set runtimepath+=${thisplugin}
+$runtimepath
 filetype plugin indent on
 syntax enable"
 

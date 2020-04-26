@@ -95,6 +95,10 @@ let g:conjoin_map_J = '<Leader>z'
 let g:conjoin_map_gJ = '<Leader>x'
 ```
 
+The `J` and `gJ` mappings are repeatable with `.` if
+(vim-repeat)[https://github.com/tpope/vim-repeat] is installed.  Repeat does not
+currently work with alternate mappings and delegated mappings.
+
 ## Filetype support
 
 `conjoin` currently supports line continuation patterns for the following types:
