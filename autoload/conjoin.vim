@@ -148,7 +148,7 @@ function! s:substituteRange(linefirst, linelast, trailpat, leadpat) abort
 	if empty(a:leadpat) && empty(a:trailpat)
 		return
 	endif
-	for l:i in range(a:linefirst, a:linelast)
+	for l:i in range(a:linefirst, min([a:linelast, line('$')]))
 		let l:text = getline(l:i)
 		" Apply trailing pattern to all lines but the last
 		if l:i < a:linelast && !empty(a:trailpat)
@@ -158,7 +158,9 @@ function! s:substituteRange(linefirst, linelast, trailpat, leadpat) abort
 		if l:i > a:linefirst && !empty(a:leadpat)
 			let l:text = substitute(l:text, a:leadpat, '', '')
 		endif
-		call setline(l:i, l:text)
+		if l:text !=# getline(l:i)
+			call setline(l:i, l:text)
+		endif
 	endfor
 endfunction
 
