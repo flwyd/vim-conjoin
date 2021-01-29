@@ -212,6 +212,7 @@ let s:double_quote_ampersand = [['"\s*&\s*$', '^\s*"'], ['"\s*$', '^\s*&\s*"']]
 " m4 uses an empty trailing comment (dnl) to avoid outputting newline:
 "   m4
 let s:default_filetypes = {
+			\ 'make': {'trailing': '\\$'},
 			\ 'sh': {'trailing': '\\$'},
 			\ 'bash': {'trailing': '\\$'},
 			\ 'csh': {'trailing': '\\$'},
