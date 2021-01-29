@@ -113,6 +113,7 @@ currently work with alternate mappings and delegated mappings.
 * `csh`
 * `fortran`
 * `m4`
+* `make`
 * `mma`
 * `plaintex`
 * `ps1`
