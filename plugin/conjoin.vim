@@ -251,6 +251,8 @@ let s:default_filetypes = {
 			\ 'm4': {'trailing': '\<dnl$'},
 			\ 'pascal': {'quote': s:single_quote_plus},
 			\ 'cs': {'quote': s:double_quote_plus},
+			\ 'dart': {'quote': s:double_quote_plus + s:single_quote_plus
+				\ + s:double_quote_sequential + s:single_quote_sequential},
 			\ 'go': {'quote': s:double_quote_plus},
 			\ 'java': {'quote': s:double_quote_plus},
 			\ 'kotlin': {'quote': s:double_quote_plus},

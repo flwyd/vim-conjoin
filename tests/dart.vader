@@ -1,0 +1,92 @@
+# Vader tests for quote joining with conjoin.
+# Dart merges sequential literal quotes (they can also be separated by +) and
+# lacks line continuation. Dart treats `'foo' "bar"` as a single merged string
+# but conjoin doesn't merge mixed quotes like that.
+
+Given dart (A multi-line constant):
+  class Foo {
+    var text1 = "Lorem "
+      + "ipsum " +
+      "dolor "
+      +"sit "
+      + "amet, "+
+      "consectetur"
+      + " adipisicing "   +   
+      "elit";
+    var text2 = text1
+      + ", sed"
+      " do eiusmod " + 'tempor '
+      '"incididunt ut labore"'
+      " et dolore magna aliqua."
+    ;
+  }
+
+Do (Join strings with count J and visual J):
+  j8Jjv5jJ
+
+Expect java:
+  class Foo {
+    var text1 = "Lorem ipsum dolor sit amet, consectetur adipisicing elit";
+    var text2 = text1 + ", sed do eiusmod " + 'tempor "incididunt ut labore"' " et dolore magna aliqua." ;
+  }
+
+Given dart (A method call with a multi-line string):
+  void main() {
+    myfunc(
+      "Won't "
+      "$you",
+      "be",
+      + my
+      , 'neigh'   
+      'bor')
+    ;
+  }
+
+Do (Join strings with count gJ):
+  2gg8gJ
+
+Expect java:
+  void main() {
+    myfunc(    "Won't $you",    "be",    + my    , 'neighbor')  ;
+  }
+
+
+Given dart (comments and a method):
+  class Foo {
+    /**
+     * Returns "a " +
+     * "String that's"
+     *  ' been '
+     *   'concatenated'.
+     */
+    String method() {
+      return 'Lorem ' +
+  "ipsum"
+  " dolor " +
+    + "sit amet,"
+    + getClass()
+    +   ' consectetur'
+        ' adipisicing elit,';
+    }
+    // Comment with "quote"
+    // + "d strings"
+    /* Block 'comment'
+       'without leading *'
+       " and quotes"
+       " and stuff" + */
+  }
+
+Execute (Join comments and quotes with :Join and formatoptions=j):
+  setlocal formatoptions+=j
+  2,7Join | 4Join! 7 | +2Join | $-4Join 4
+
+Expect java:
+# Comment trimming with formatoptions=j happens after quote merging
+  class Foo {
+    /** Returns "a " + "String that's" ' been ' 'concatenated'.  */
+    String method() {
+      return 'Lorem ' +"ipsum dolor " +  + "sit amet,"  + getClass()  +   ' consectetur adipisicing elit,';
+    }
+    // Comment with "quote" + "d strings"
+    /* Block 'commentwithout leading *' " and quotes and stuff" + */
+  }
