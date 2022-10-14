@@ -1,0 +1,36 @@
+# Vader tests for quote joining with conjoin.
+# Elixir uses <> to concatenate double-quoted strings and doesn't use line continuation.
+
+Given elixir (A two-line string):
+  x = "Hello" <>
+    "World"
+  IO.puts(x)
+
+Execute (Join with :Join):
+  Join
+
+Expect elixir:
+  x = "HelloWorld"
+  IO.puts(x)
+
+
+Given elixir (Function call with a multiline string):
+  IO.puts(x <>
+  y
+  <> "Lorem "
+  <>"ipsum"<>
+    "dolor"			<>
+  "sic"    <>
+  "amet,"
+  <> "consectetur "
+    <>  "adipisicing " <> "elit"
+  <> 'a'
+  <> 'b'
+  )
+
+Do (Join the file with visual J):
+  VGJ
+
+Expect elixir:
+  IO.puts(x <> y <> "Lorem ipsumdolorsicamet,consectetur adipisicing " <> "elit" <> 'a' <> 'b')
+

@@ -133,10 +133,16 @@ currently work with alternate mappings and delegated mappings.
 
 * `ada`
 * `applescript`
+* `c`
 * `cobol`
 * `cobra`
+* `cpp`
 * `cs`
+* `d`
+* `dart`
+* `elixir`
 * `erlang`
+* `fortran`
 * `go`
 * `haskell`
 * `java`
@@ -146,8 +152,11 @@ currently work with alternate mappings and delegated mappings.
 * `lua`
 * `mma`
 * `pascal`
+* `perl`
+* `php`
 * `ps1`
 * `python`
+* `raku`
 * `ruby`
 * `rust`
 * `scala`
@@ -155,6 +164,7 @@ currently work with alternate mappings and delegated mappings.
 * `typescript`
 * `vb`
 * `vhdl`
+* `vim`
 
 You can add support for your own filetypes in your `.vimrc`:
 

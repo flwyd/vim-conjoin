@@ -125,9 +125,9 @@ CONFIGURATION                                                 *conjoin-config*
 
 |g:conjoin_filetypes| configures continuation patterns for many programming
 lanugages.  It is a dict with filetypes (e.g. "sh", "ruby", "vim") as keys and
-conjoin pattern dicts as values.  A conjoin dict has optional trailing" and
-"leading" keys mapped to regular expression patterns. A conjoin dict may also
-have a 'quote' entry mapped to a list of 2-element lists of trailing/leading
+conjoin pattern dicts as values.  A conjoin dict has optional `trailing` and
+`leading` keys mapped to regular expression patterns. A conjoin dict may also
+have a `quote` entry mapped to a list of 2-element lists of trailing/leading
 patterns for string literal concatenation, e.g.
 >
   [['"\s*+\s*$', '^\s*"'], ['"\s*$', '^\s*+\s*"']]
@@ -154,13 +154,14 @@ disable merging string literals.
 
 The default set of line continuation filetypes is
 >
-  applescript autoit bash c cobra context cpp csh fortran m4 mma
+  applescript autoit bash c cobra context cpp csh fortran m4 make mma
   plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
 <
 and the default set of string-merging filetypes is
 >
-  ada applescript cobol cobra cs erlang go haskell java javascript julia
-  kotlin lua mma pascal ps1 python ruby rust scala swift typescript vb vhdl
+  ada applescript c cobol cobra cpp cs d dart elixir erlang fortran go
+  haskell java javascript julia kotlin lua mma pascal perl php ps1 python
+  raku ruby rust scala swift typescript vb vhdl vim
 <
 
 ==============================================================================

@@ -117,8 +117,8 @@ let did_conjoin = 1
 " @setting(g:conjoin_filetypes) configures continuation patterns for many
 " programming lanugages.  It is a dict with filetypes (e.g. "sh", "ruby",
 " "vim") as keys and conjoin pattern dicts as values.  A conjoin dict has
-" optional trailing" and "leading" keys mapped to regular expression patterns.
-" A conjoin dict may also have a 'quote' entry mapped to a list of 2-element
+" optional `trailing` and `leading` keys mapped to regular expression patterns.
+" A conjoin dict may also have a `quote` entry mapped to a list of 2-element
 " lists of trailing/leading patterns for string literal concatenation, e.g. >
 "   [['"\s*+\s*$', '^\s*"'], ['"\s*$', '^\s*+\s*"']]
 " < for double-quoted string literals concatenated with a + operator.
@@ -141,11 +141,12 @@ let did_conjoin = 1
 " @setting(b:conjoin_merge_strings)=0 will disable merging string literals.
 "
 " The default set of line continuation filetypes is >
-"   applescript autoit bash c cobra context cpp csh fortran m4 mma
+"   applescript autoit bash c cobra context cpp csh fortran m4 make mma
 "   plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
 " < and the default set of string-merging filetypes is >
-"   ada applescript cobol cobra cs erlang go haskell java javascript julia
-"   kotlin lua mma pascal ps1 python ruby rust scala swift typescript vb vhdl
+"   ada applescript c cobol cobra cpp cs d dart elixir erlang fortran go
+"   haskell java javascript julia kotlin lua mma pascal perl php ps1 python
+"   raku ruby rust scala swift typescript vb vhdl vim
 " <
 
 if !exists('g:conjoin_filetypes')
@@ -174,13 +175,16 @@ let s:double_quote_double_plus = [['"\s*++\s*$', '^\s*"'], ['"\s*$', '^\s*++\s*"
 " Two "strings" with a . concatenation operator as in Perl/PHP/Vim
 let s:double_quote_dot = [['"\s*\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\s*"']]
 " Two 'strings' with a . concatenation operator as in Perl/PHP/Vim
-let s:single_quote_dot = [["'\\s*\.\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\.\\s*'"]]
+let s:single_quote_dot = [["'\\s*\\.\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\\.\\s*'"]]
 " Two "strings" with a ~ concatenation operator as in D/Raku
 let s:double_quote_tilde = [['"\s*\~\s*$', '^\s*"'], ['"\s*$', '^\s*\~\s*"']]
 " Two 'strings' with a ~ concatenation operator as in Raku
-let s:single_quote_tilde = [["'\\s*\~\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\~\\s*'"]]
+let s:single_quote_tilde = [["'\\s*\\~\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\\~\\s*'"]]
 " Two "strings" with a & concatenation operator as in Ada/AppleScript/COBOL/VB
 let s:double_quote_ampersand = [['"\s*&\s*$', '^\s*"'], ['"\s*$', '^\s*&\s*"']]
+" Two "strings" with a <> concatenation operator as in Elixir/Wolfram
+let s:double_quote_left_right = [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '^\s*<>\s*"']]
+
 " TODO Don't merge multiline literals (e.g. three quotes) with normal strings
 " TODO "foo" + r"bar" isn't merged, but r"foo" + "bar" merges to r"foobar"
 " but raw strings and other special syntax shouldn't be merged.
@@ -211,6 +215,9 @@ let s:double_quote_ampersand = [['"\s*&\s*$', '^\s*"'], ['"\s*$', '^\s*&\s*"']]
 "   context plaintex tex
 " m4 uses an empty trailing comment (dnl) to avoid outputting newline:
 "   m4
+"
+" Quote-merging-only languages are listed in alphabetic order after languages
+" with line continuation support, which are grouped by syntax.
 let s:default_filetypes = {
 			\ 'make': {'trailing': '\\$'},
 			\ 'sh': {'trailing': '\\$'},
@@ -231,7 +238,7 @@ let s:default_filetypes = {
 			\ 'tcl': {'trailing': '\\$'},
 			\ 'texmf': {'trailing': '\\$'},
 			\ 'mma': {'trailing': '[\uF3B1\\]$',
-				\ 'quote': [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '\s*<>"']]},
+				\ 'quote': s:double_quote_left_right},
 			\ 'ps1': {'trailing': '\s`$',
 				\ 'quote': s:double_quote_plus + s:single_quote_plus},
 			\ 'autoit': {'trailing': '\s_$'},
@@ -241,7 +248,8 @@ let s:default_filetypes = {
 				\ 'quote': s:double_quote_ampersand},
 			\ 'applescript': {'trailing': '[\u00AC]$',
 				\ 'quote': s:double_quote_ampersand},
-			\ 'vim': {'leading': '^\s*\\'},
+			\ 'vim': {'leading': '^\s*\\',
+				\ 'quote': s:single_quote_dot + s:double_quote_dot},
 			\ 'vroom': {'leading': '\v^\s*\|'},
 			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&',
 				\ 'quote': [['"\s*//\s*$', '^\s*"'], ['"\s*$', '^\s*//\s*"']]},
@@ -249,27 +257,34 @@ let s:default_filetypes = {
 			\ 'context': {'trailing': '%$'},
 			\ 'plaintex': {'trailing': '%$'},
 			\ 'm4': {'trailing': '\<dnl$'},
-			\ 'pascal': {'quote': s:single_quote_plus},
+			\ 'ada': {'quote': s:double_quote_ampersand},
+			\ 'cobol': {'quote': s:double_quote_ampersand},
 			\ 'cs': {'quote': s:double_quote_plus},
+			\ 'd': {'quote': s:double_quote_tilde},
 			\ 'dart': {'quote': s:double_quote_plus + s:single_quote_plus
 				\ + s:double_quote_sequential + s:single_quote_sequential},
+			\ 'elixir': {'quote': s:double_quote_left_right},
+			\ 'erlang': {'quote': s:double_quote_double_plus
+				\ + s:double_quote_sequential},
+			\ 'haskell': {'quote': s:double_quote_double_plus},
 			\ 'go': {'quote': s:double_quote_plus},
 			\ 'java': {'quote': s:double_quote_plus},
+			\ 'javascript': {'quote': s:double_quote_plus
+				\ + s:single_quote_plus + s:backtick_plus},
+			\ 'julia': {'quote': [['"\s*\*\s*$', '^\s*"'], ['"\s*$', '^\s*\*\s*"']]},
 			\ 'kotlin': {'quote': s:double_quote_plus},
+			\ 'lua': {'quote': [['"\s*\.\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\.\s*"']]},
+			\ 'pascal': {'quote': s:single_quote_plus},
+			\ 'perl': {'quote': s:double_quote_dot + s:single_quote_dot},
+			\ 'php': {'quote': s:double_quote_dot + s:single_quote_dot},
+			\ 'raku': {'quote': s:double_quote_tilde + s:single_quote_tilde},
+			\ 'perl6': {'quote': s:double_quote_tilde + s:single_quote_tilde},
 			\ 'rust': {'quote': s:double_quote_plus},
 			\ 'scala': {'quote': s:double_quote_plus},
 			\ 'swift': {'quote': s:double_quote_plus},
-			\ 'javascript': {'quote': s:double_quote_plus
-				\ + s:single_quote_plus + s:backtick_plus},
 			\ 'typescript': {'quote': s:double_quote_plus
 				\ + s:single_quote_plus + s:backtick_plus},
-			\ 'erlang': {'quote': s:double_quote_double_plus},
-			\ 'haskell': {'quote': s:double_quote_double_plus},
-			\ 'ada': {'quote': s:double_quote_ampersand},
-			\ 'cobol': {'quote': s:double_quote_ampersand},
 			\ 'vhdl': {'quote': s:double_quote_ampersand},
-			\ 'lua': {'quote': [['"\s*\.\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\.\s*"']]},
-			\ 'julia': {'quote': [['"\s*\*\s*$', '^\s*"'], ['"\s*$', '^\s*\*\s*"']]},
 			\}
 
 " Populate g:conjoin_filetypes with defaults, respecting user overrides.

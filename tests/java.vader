@@ -72,8 +72,10 @@ Given java (Javadoc and a method):
   }
 
 Execute (Join comments and quotes with :Join and formatoptions=j):
+  let b:old_formatoptions = &formatoptions
   setlocal formatoptions+=j
   2,7Join | 4Join! 7 | +2Join | $-3Join 3
+  exec 'setlocal formatoptions=' . b:old_formatoptions
 
 Expect java:
 # Comment trimming with formatoptions=j happens after quote merging

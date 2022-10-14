@@ -1,0 +1,38 @@
+# Vader tests for quote joining with conjoin.
+# Raku uses ~ to concatenate strings and doesn't use line continuation.
+
+Given raku (A two-line string):
+  my $x = "Hello" ~
+    "World";
+  say $x;
+
+Execute (Join with :Join):
+  Join
+
+Expect raku:
+  my $x = "HelloWorld";
+  say $x;
+
+
+Given raku (Function call with a multiline string):
+  say $x ~
+  y
+  ~ "Lorem "
+  ~"ipsum"~
+    "dolor"			~
+  "sic"    ~
+  "amet,"
+  ~ "consectetur "
+    ~  "adipisicing " ~ "elit"
+  ~ 'a'
+  ~ 'b' ~
+  "foo"
+  ~~ "bar";
+
+Do (Join the file with visual J):
+  VGJ
+
+Expect raku:
+  say $x ~ y ~ "Lorem ipsumdolorsicamet,consectetur adipisicing " ~ "elit" ~ 'ab' ~ "foo" ~~ "bar";
+
+

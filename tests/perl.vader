@@ -1,0 +1,37 @@
+# Vader tests for quote joining with conjoin.
+# Perl uses . to concatenate strings and doesn't use line continuation.
+
+Given perl (A two-line string):
+  my $x = "Hello" .
+    "World";
+  print $x;
+
+Execute (Join with :Join):
+  Join
+
+Expect perl:
+  my $x = "HelloWorld";
+  print $x;
+
+
+Given perl (Function call with a multiline string):
+  print $x .
+  y
+  . "Lorem "
+  ."ipsum".
+    "dolor"			.
+  "sic"    .
+  "amet,"
+  . "consectetur "
+    .  "adipisicing " . "elit"
+  . 'a'
+  . 'b' .
+  "foo"
+  .. "bar";
+
+Do (Join the file with visual J):
+  VGJ
+
+Expect perl:
+  print $x .  y . "Lorem ipsumdolorsicamet,consectetur adipisicing " . "elit" . 'ab' .  "foo" .. "bar";
+
