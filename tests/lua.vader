@@ -1,5 +1,11 @@
 # Vader tests for quote joining with conjoin.
-# Lua uses .. to concatenate strings and doesn't use line continuation.
+# Lua uses .. to concatenate strings and doesn't use line continuation, except
+# inside strings where \ followed by newline allows multi-line strings without
+# removing any leading space and \z removes the next run of whitespace,
+# including newlines (handy for keeping long strings indentation-aligned).
+# The quote config causes conjoin to move \ and \z continuation characters
+# even if they're not inside a string, but since they would be syntax errors
+# if left in, this seems reasonable.
 
 Given lua (A multi-line string):
   x = "foo" ..
@@ -44,4 +50,17 @@ Execute (Join file with Join count):
   Join 8
 
 Expect lua:
-  print( "Lorem " "ipsum " + "dolor " \ & "sit " ^ "amet" .. ',')
+  print( "Lorem " "ipsum " + "dolor "   & "sit " ^ "amet" .. ',')
+
+
+Given lua (Line break escape and skip-space in a string):
+  print("Lorem\
+      ipsum",
+    "dolor \z
+      sit " .. "amet")
+
+Do (Join with J count):
+  4J
+
+Expect lua:
+  print("Lorem    ipsum", "dolor sit " .. "amet")
