@@ -7,7 +7,19 @@
 # even if they're not inside a string, but since they would be syntax errors
 # if left in, this seems reasonable.
 
-Given lua (A multi-line string):
+Given lua (A single-quoted multi-line string):
+  x = 'foo' ..
+    'bar'
+    ..'baz'
+
+Do (Join with gJ):
+  3gJ
+
+Expect lua:
+  x = 'foobarbaz'
+
+
+Given lua (A double-quoted multi-line string):
   x = "foo" ..
   "bar" ..
   "baz"
@@ -34,6 +46,20 @@ Do (Join file with visual gJ):
 
 Expect lua:
   print("Lorem ipsum dolor sit amet")
+
+
+Given lua (A multi-line string with mixed quote styles):
+  print("Lorem " ..
+  "ipsum "
+  .. 'dolor' ..
+  ' sic '..
+    'amet')
+
+Execute (Join file with :Join):
+  %Join
+
+Expect lua:
+  print("Lorem ipsum " .. 'dolor sic amet')
 
 
 Given lua (No string concatenation, invalid syntax):

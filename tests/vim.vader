@@ -121,3 +121,55 @@ Execute (Join with :Join!):
 
 Expect vim:
   nnoremap <Leader>J:join<CR>
+
+
+Given vim (Single-quote string concatenation with one dot):
+  printf('Lorem '
+    \ . 'ipsum' .
+    \' sic '
+    \.'dolor' . ' amet')
+
+Do (Join with J):
+  4J
+
+Expect vim:
+  printf('Lorem ipsum sic dolor' . ' amet')
+
+
+Given vim (Double-quote string concatenation with one dot):
+  printf("Lorem "
+    \ . "ipsum" .
+    \" sic "
+    \."dolor" . " amet")
+
+Do (Join with gJ):
+  4gJ
+
+Expect vim:
+  printf("Lorem ipsum sic dolor" . " amet")
+
+
+Given vim (Single-quote string concatenation with two dots):
+  printf('Lorem '
+    \ .. 'ipsum' ..
+    \' sic '
+    \..'dolor' .. ' amet')
+
+Do (Join with gJ):
+  4J
+
+Expect vim:
+  printf('Lorem ipsum sic dolor' .. ' amet')
+
+
+Given vim (Double-quote string concatenation with two dots):
+  printf("Lorem "
+    \ .. "ipsum" ..
+    \" sic "
+    \.."dolor" .. " amet")
+
+Do (Join with J):
+  4J
+
+Expect vim:
+  printf("Lorem ipsum sic dolor" .. " amet")

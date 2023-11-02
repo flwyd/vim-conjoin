@@ -176,6 +176,10 @@ let s:double_quote_double_plus = [['"\s*++\s*$', '^\s*"'], ['"\s*$', '^\s*++\s*"
 let s:double_quote_dot = [['"\s*\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\s*"']]
 " Two 'strings' with a . concatenation operator as in Perl/PHP/Vim
 let s:single_quote_dot = [["'\\s*\\.\\s*$", "^\\s*'"], ["'\\s*$", "^\\s*\\.\\s*'"]]
+" Two "strings" with a .. concatenation operator as in Lua/Vim
+let s:double_quote_two_dots = [['"\s*$', '^\s*\.\.\s*"'], ['"\s*\.\.\s*$', '^\s*"']]
+" Two 'strings' with a .. concatenation operator as in Lua/Vim
+let s:single_quote_two_dots = [["'\\s*$", "^\\s*\\.\\.\\s*'"], ["'\\s*\\.\\.\\s*$", "^\\s*'"]]
 " Two "strings" with a ~ concatenation operator as in D/Raku
 let s:double_quote_tilde = [['"\s*\~\s*$', '^\s*"'], ['"\s*$', '^\s*\~\s*"']]
 " Two 'strings' with a ~ concatenation operator as in Raku
@@ -249,7 +253,8 @@ let s:default_filetypes = {
 			\ 'applescript': {'trailing': '[\u00AC]$',
 				\ 'quote': s:double_quote_ampersand},
 			\ 'vim': {'leading': '^\s*\\',
-				\ 'quote': s:single_quote_dot + s:double_quote_dot},
+			\ 'quote': s:single_quote_dot + s:double_quote_dot
+				\ + s:single_quote_two_dots + s:double_quote_two_dots},
 			\ 'vroom': {'leading': '\v^\s*\|'},
 			\ 'fortran': {'trailing': '&\s*$', 'leading': '^\s*&',
 				\ 'quote': [['"\s*//\s*$', '^\s*"'], ['"\s*$', '^\s*//\s*"']]},
@@ -273,8 +278,8 @@ let s:default_filetypes = {
 				\ + s:single_quote_plus + s:backtick_plus},
 			\ 'julia': {'quote': [['"\s*\*\s*$', '^\s*"'], ['"\s*$', '^\s*\*\s*"']]},
 			\ 'kotlin': {'quote': s:double_quote_plus},
-			\ 'lua': {'quote': [['"\s*\.\.\s*$', '^\s*"'], ['"\s*$', '^\s*\.\.\s*"'],
-			  \ ['\\$', '^'], ['\\z\s*$', '^\s*']]},
+			\ 'lua': {'quote': s:double_quote_two_dots + s:single_quote_two_dots
+				\ + [['\\$', '^'], ['\\z\s*$', '^\s*']]},
 			\ 'pascal': {'quote': s:single_quote_plus},
 			\ 'perl': {'quote': s:double_quote_dot + s:single_quote_dot},
 			\ 'php': {'quote': s:double_quote_dot + s:single_quote_dot},
