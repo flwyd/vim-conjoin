@@ -111,6 +111,7 @@ currently work with alternate mappings and delegated mappings.
 * `context`
 * `cpp`
 * `csh`
+* `fish`
 * `fortran`
 * `m4`
 * `make`
