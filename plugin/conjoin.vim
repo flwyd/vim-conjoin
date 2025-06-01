@@ -141,7 +141,7 @@ let did_conjoin = 1
 " @setting(b:conjoin_merge_strings)=0 will disable merging string literals.
 "
 " The default set of line continuation filetypes is >
-"   applescript autoit bash c cobra context cpp csh fortran m4 make mma
+"   applescript autoit bash c cobra context cpp csh fish fortran m4 make mma
 "   plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
 " < and the default set of string-merging filetypes is >
 "   ada applescript c cobol cobra cpp cs d dart elixir erlang fortran go
@@ -159,7 +159,7 @@ if !exists('g:conjoin_merge_strings')
 	let g:conjoin_merge_strings = 1
 endif
 
-" Common tring literal patterns: lists of [trailing, leading] pairs.
+" Common string literal patterns: lists of [trailing, leading] pairs.
 " Two sequential "strings" as in C/C++/D/Python/Ruby
 let s:double_quote_sequential = [['"\s*$', '^\s*"']]
 " Two sequential 'strings' as in Python/Ruby
@@ -197,7 +197,7 @@ let s:double_quote_left_right = [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '^\s*<>\s*"'
 " https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(syntax)#Line_continuation
 " Entries are ordered by the continuation pattern they use:
 " Shell-style languages use a trailing backslash (\):
-"   sh bash csh tcsh zsh c cpp python ruby tcl texmf
+"   sh bash csh fish tcsh zsh c cpp python ruby tcl texmf
 " Mathematica/Wolfram Language uses a trailing backslash or the special
 " Unicode character F3B1 ():
 "   mma
@@ -209,7 +209,7 @@ let s:double_quote_left_right = [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '^\s*<>\s*"'
 "   applescript
 " Vim uses a leading backslash and optional space, :help line-continuation
 "   vim
-" Vroom vim testing framework uses a leading pipe preceeded by space:
+" Vroom vim testing framework uses a leading pipe preceded by space:
 "   vroom
 " Fortran 90+ uses a trailing ampersand and optionally a leading ampersand on
 " the next line.  Note that this pattern doesn't require the & to be in column
@@ -227,6 +227,7 @@ let s:default_filetypes = {
 			\ 'sh': {'trailing': '\\$'},
 			\ 'bash': {'trailing': '\\$'},
 			\ 'csh': {'trailing': '\\$'},
+			\ 'fish': {'trailing': '\\$'},
 			\ 'tcsh': {'trailing': '\\$'},
 			\ 'zsh': {'trailing': '\\$'},
 			\ 'c': {'trailing': '\\$',
@@ -298,7 +299,7 @@ call extend(g:conjoin_filetypes, s:default_filetypes, 'keep')
 
 " Define a normal/visual mode mapping, respecting existing mapping.
 " {mode} is 'n' or 'x', {mapping} is the key(s) to map, {default} is either
-" 'J' or 'gJ' to indicicate command behavior.
+" 'J' or 'gJ' to indicate command behavior.
 function! s:mapping(mode, mapping, default) abort
 	let l:fname = {'n': 'joinNormal', 'x': 'joinVisual'}[a:mode]
 	" See if mapping is already defined.  Returns empty string for native vim.
