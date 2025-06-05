@@ -112,6 +112,7 @@ currently work with alternate mappings and delegated mappings.
 * `cpp`
 * `csh`
 * `fish`
+* `tmux`
 * `fortran`
 * `m4`
 * `make`

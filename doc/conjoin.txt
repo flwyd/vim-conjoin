@@ -154,8 +154,8 @@ disable merging string literals.
 
 The default set of line continuation filetypes is
 >
-  applescript autoit bash c cobra context cpp csh fish fortran m4 make mma
-  plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
+  applescript autoit bash c cobra context cpp csh fish tmux fortran m4 make
+  mma plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
 <
 and the default set of string-merging filetypes is
 >
