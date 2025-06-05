@@ -141,8 +141,8 @@ let did_conjoin = 1
 " @setting(b:conjoin_merge_strings)=0 will disable merging string literals.
 "
 " The default set of line continuation filetypes is >
-"   applescript autoit bash c cobra context cpp csh fish fortran m4 make mma
-"   plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
+"   applescript autoit bash c cobra context cpp csh fish tmux fortran m4 make
+"   mma plaintex ps1 python ruby sh tcl tcsh tex texmf vb vim vroom zsh
 " < and the default set of string-merging filetypes is >
 "   ada applescript c cobol cobra cpp cs d dart elixir erlang fortran go
 "   haskell java javascript julia kotlin lua mma pascal perl php ps1 python
@@ -197,7 +197,7 @@ let s:double_quote_left_right = [['"\s*<>\s*$', '^\s*"'], ['"\s*$', '^\s*<>\s*"'
 " https://en.wikipedia.org/wiki/Comparison_of_programming_languages_(syntax)#Line_continuation
 " Entries are ordered by the continuation pattern they use:
 " Shell-style languages use a trailing backslash (\):
-"   sh bash csh fish tcsh zsh c cpp python ruby tcl texmf
+"   sh bash csh fish tcsh zsh tmux c cpp python ruby tcl texmf
 " Mathematica/Wolfram Language uses a trailing backslash or the special
 " Unicode character F3B1 ():
 "   mma
@@ -230,6 +230,7 @@ let s:default_filetypes = {
 			\ 'fish': {'trailing': '\\$'},
 			\ 'tcsh': {'trailing': '\\$'},
 			\ 'zsh': {'trailing': '\\$'},
+			\ 'tmux': {'trailing': '\\$'},
 			\ 'c': {'trailing': '\\$',
 				\ 'quote': s:double_quote_sequential},
 			\ 'cpp': {'trailing': '\\$',
